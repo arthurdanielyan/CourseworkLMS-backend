@@ -1,0 +1,9 @@
+lms:
+  jwt:
+    secret: test-secret-that-is-at-least-thirty-two-bytes-long
+
+spring:
+  datasource:
+    hikari:
+      # One connection, so consecutive transactions are guaranteed to reuse it.
+      maximum-pool-size: 1

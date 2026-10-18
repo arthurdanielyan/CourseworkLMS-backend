@@ -1,0 +1,16 @@
+# A PostgreSQL 18 for teammates without a local install. Flyway builds the schema on the backend's first start.
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: LMS
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+      - lms-data:/var/lib/postgresql
+
+volumes:
+  lms-data:

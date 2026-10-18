@@ -1,0 +1,7 @@
+# Running on a developer machine against the local PostgreSQL. Passwords still come from the environment.
+lms:
+  jwt:
+    # Local development only; any other environment must set JWT_SECRET.
+    secret: ${JWT_SECRET:local-development-secret-not-for-production-use}
+  exposed:
+    show-sql: true
