@@ -30,6 +30,14 @@ _Avoid_: right, privilege, scope
 A Polytechnic address registered in advance by an Admin; signing up with it makes the account a Teacher instead of a Student.
 _Avoid_: teacher whitelist, staff email
 
+**Pending Registration**:
+A signup whose Verification Code has not been entered yet. It is not a user: the account exists only once the code is verified, and a new signup for the same address replaces it.
+_Avoid_: unverified user, inactive account
+
+**Verification Code**:
+The six-digit code emailed to a Pending Registration, valid for ten minutes and five tries; entering it creates the account and logs the user in.
+_Avoid_: OTP, PIN, activation code
+
 ### Books
 
 **Owner**:

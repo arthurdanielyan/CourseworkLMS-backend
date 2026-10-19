@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core.simple.JdbcClient
 import java.sql.DriverManager
@@ -17,15 +18,19 @@ class MigrationsTest : IntegrationTest() {
     private lateinit var jdbcClient: JdbcClient
 
     @Test
-    fun `baseline and security migrations are applied`() {
+    fun `every migration is applied successfully`() {
         val container = LmsPostgres.container
-        val versions = DriverManager.getConnection(container.jdbcUrl, container.username, container.password).use {
+        val applied = DriverManager.getConnection(container.jdbcUrl, container.username, container.password).use {
             it.createStatement()
                 .executeQuery("select version from flyway_schema_history where success order by installed_rank")
                 .let { rows -> generateSequence { if (rows.next()) rows.getString(1) else null }.toList() }
         }
+        val migrationFiles = PathMatchingResourcePatternResolver()
+            .getResources("classpath:db/migration/V*__*.sql")
+            .mapNotNull { it.filename?.substringAfter('V')?.substringBefore("__") }
+            .sortedBy { it.toInt() }
 
-        assertThat(versions).containsExactly("1", "2")
+        assertThat(applied).containsExactlyElementsOf(migrationFiles)
     }
 
     @Test

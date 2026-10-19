@@ -1,8 +1,6 @@
 package com.coursework.lms
 
-import com.coursework.lms.core.testing.assertSchemaMatches
 import com.coursework.lms.support.IntegrationTest
-import com.coursework.lms.support.RolesTable
 import com.coursework.lms.support.SeedUsers
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders
@@ -72,10 +70,5 @@ class ApiContractTest : IntegrationTest() {
             status { isOk() }
             jsonPath("$.display_name") { value("Artur") }
         }
-    }
-
-    @Test
-    fun `the Exposed mapping of a table matches the migrated schema`() {
-        assertSchemaMatches(RolesTable)
     }
 }

@@ -12,5 +12,11 @@ services:
       - ./docker/init:/docker-entrypoint-initdb.d:ro
       - lms-data:/var/lib/postgresql
 
+  mailpit:
+    image: axllent/mailpit:v1.31
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   lms-data:

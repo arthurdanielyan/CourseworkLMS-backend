@@ -28,7 +28,9 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(ApiException::class)
     fun handleApiException(error: ApiException): ResponseEntity<ProblemDetail> {
-        return problem(error.status, error.code, error.detail)
+        return ResponseEntity.status(error.status)
+            .headers { headers -> error.headers.forEach(headers::set) }
+            .body(problemDetail(error.status, error.code, error.detail))
     }
 
     @ExceptionHandler(AuthenticationException::class)

@@ -1,6 +1,9 @@
 package com.coursework.lms.core.error
 
-/** Stable machine-readable values of a problem response's `code`, which clients switch on. */
+/**
+ * Stable machine-readable values of a problem response's `code` that any module may answer with, which clients switch
+ * on. Codes only one feature answers with live in that feature's module.
+ */
 object ErrorCode {
 
     const val NOT_AUTHENTICATED = "not_authenticated"
