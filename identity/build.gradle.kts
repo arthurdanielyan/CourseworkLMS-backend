@@ -13,4 +13,5 @@ kotlin {
 
 dependencies {
     api(projects.core)
+    implementation(libs.swagger.annotations)
 }
