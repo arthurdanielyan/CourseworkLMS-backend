@@ -1,0 +1,277 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Library Management System API",
+    "version" : "v1"
+  },
+  "security" : [ {
+    "bearer" : [ ]
+  } ],
+  "paths" : {
+    "/api/v1/auth/login" : {
+      "post" : {
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenPairResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "tags" : [ "session-controller" ]
+      }
+    },
+    "/api/v1/auth/refresh" : {
+      "post" : {
+        "operationId" : "refresh",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenPairResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "tags" : [ "session-controller" ]
+      }
+    },
+    "/api/v1/auth/registrations" : {
+      "post" : {
+        "operationId" : "start",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StartRegistrationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PendingRegistrationResponse"
+                }
+              }
+            },
+            "description" : "Accepted"
+          }
+        },
+        "security" : [ ],
+        "tags" : [ "registration-controller" ]
+      }
+    },
+    "/api/v1/auth/registrations/resend" : {
+      "post" : {
+        "operationId" : "resend",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ResendCodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PendingRegistrationResponse"
+                }
+              }
+            },
+            "description" : "Accepted"
+          }
+        },
+        "security" : [ ],
+        "tags" : [ "registration-controller" ]
+      }
+    },
+    "/api/v1/auth/registrations/verify" : {
+      "post" : {
+        "operationId" : "verify",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VerifyCodeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenPairResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "security" : [ ],
+        "tags" : [ "registration-controller" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "LoginRequest" : {
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "minLength" : 1
+          },
+          "password" : {
+            "type" : "string",
+            "example" : "Library#2026",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "email", "password" ]
+      },
+      "PendingRegistrationResponse" : {
+        "properties" : {
+          "code_expires_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-01T18:10:00Z"
+          },
+          "email" : {
+            "type" : "string",
+            "example" : "anna.petrosyan@polytechnic.am"
+          },
+          "resend_available_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-01T18:02:00Z"
+          }
+        }
+      },
+      "RefreshRequest" : {
+        "properties" : {
+          "refresh_token" : {
+            "type" : "string",
+            "example" : "q3Jx9vZt0bWm2LkR8sYfH4nE6uA1cD7gP5oT3iV0xQw",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "refresh_token" ]
+      },
+      "ResendCodeRequest" : {
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "^[^@\\s]+@polytechnic\\.am$"
+          }
+        },
+        "required" : [ "email" ]
+      },
+      "StartRegistrationRequest" : {
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "^[^@\\s]+@polytechnic\\.am$"
+          },
+          "full_name" : {
+            "type" : "string",
+            "example" : "Anna Petrosyan",
+            "maxLength" : 100,
+            "minLength" : 2
+          },
+          "password" : {
+            "type" : "string",
+            "example" : "Library#2026"
+          }
+        },
+        "required" : [ "email", "full_name" ]
+      },
+      "TokenPairResponse" : {
+        "properties" : {
+          "access_token" : {
+            "type" : "string",
+            "example" : "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MiIsInJvbGUiOiJzdHVkZW50In0.dGhpcy1pcy1hbi1leGFtcGxl"
+          },
+          "refresh_token" : {
+            "type" : "string",
+            "example" : "q3Jx9vZt0bWm2LkR8sYfH4nE6uA1cD7gP5oT3iV0xQw"
+          }
+        }
+      },
+      "VerifyCodeRequest" : {
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "example" : "482913",
+            "pattern" : "^\\d{6}$"
+          },
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "^[^@\\s]+@polytechnic\\.am$"
+          }
+        },
+        "required" : [ "email" ]
+      }
+    },
+    "securitySchemes" : {
+      "bearer" : {
+        "bearerFormat" : "JWT",
+        "scheme" : "bearer",
+        "type" : "http"
+      }
+    }
+  }
+}

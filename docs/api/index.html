@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LMS API Reference</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.14/swagger-ui.css">
+<style>
+  /* Layout: one reading column; a conventions intro above the generated Swagger reference. Light only, as Swagger UI is. */
+  :root {
+    --bg: #fbfcfd;
+    --surface: #f0f4f7;
+    --ink: #1b2730;
+    --muted: #55656f;
+    --line: #d7e0e6;
+    --accent: #1f6f8b;
+    --code-bg: #14212b;
+    --code-ink: #dbe7ee;
+    --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-block: 40px 24px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid;
+    gap: 28px;
+  }
+  header { display: grid; gap: 6px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 { margin: 0; font-size: 34px; line-height: 1.15; text-wrap: balance; }
+  h2 { margin: 0; font-size: 20px; text-wrap: balance; }
+  p { margin: 0; max-width: 68ch; }
+  .lead { color: var(--muted); }
+  /* Only the intro's own code chips; Swagger's examples keep their own styling. */
+  .wrap > :not(#swagger) code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  section { display: grid; gap: 12px; min-width: 0; }
+  .rules { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 75ch; }
+  .rules strong { font-weight: 600; }
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+  }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .two > * { min-width: 0; }
+  pre.problem {
+    margin: 0;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 14px 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+  table.codes { border-collapse: collapse; width: 100%; font-size: 15px; }
+  .codes th, .codes td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .codes th { background: var(--surface); font-weight: 600; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .codes tr:last-child td { border-bottom: none; }
+  .codes td.status { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .codes td.path { font-family: var(--font-mono); font-size: 13px; white-space: nowrap; }
+  .codes td code { white-space: nowrap; }
+  .ref-head { border-top: 1px solid var(--line); padding-top: 24px; }
+  #swagger { min-width: 0; }
+  #swagger .swagger-ui .wrapper { padding: 0; max-width: none; }
+  #swagger .swagger-ui .info { margin: 0 0 16px; }
+  #swagger .swagger-ui .info .title { display: none; }
+  #swagger .swagger-ui .scheme-container { display: none; }
+  footer { color: var(--muted); font-size: 14px; }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Library Management System · API v1</span>
+    <h1>LMS API Reference</h1>
+    <p class="lead">What the backend accepts and returns today: account access (signup with an email code, login, token refresh). Generated from the backend's code on every change to the endpoints. This page is read-only and cannot send requests.</p>
+  </header>
+
+  <section>
+    <h2>Rules that apply to every endpoint</h2>
+    <ul class="rules">
+      <li>Every path starts with <code>/api/v1</code>, and every JSON field is <strong>snake_case</strong>: <code>full_name</code>, <code>access_token</code>.</li>
+      <li>Authenticated requests send <code>Authorization: Bearer &lt;access_token&gt;</code>. The <code>/api/v1/auth/**</code> endpoints need no token.</li>
+      <li>A signup only accepts <code>@polytechnic.am</code> emails. The server picks the role: teacher for emails on the teacher list, student for everyone else.</li>
+      <li>Passwords are 8–72 characters, with upper and lower case letters, at least 2 digits and at least 1 special character.</li>
+      <li>Lists will be paged with <code>?page=0&amp;size=20</code> (page counts from 0, size up to 100).</li>
+    </ul>
+    <p class="callout"><strong>401 means only one thing:</strong> the access token is missing, expired or invalid. Call <code>POST /api/v1/auth/refresh</code> with the refresh token, store the new pair, and retry. Wrong passwords, bad codes and bad refresh tokens answer 400, so a refresh loop can't happen. Logged in but not allowed is 403.</p>
+  </section>
+
+  <section class="two">
+    <div style="display:grid;gap:12px;min-width:0">
+      <h2>Error format</h2>
+      <p>Every failure is a problem response (RFC 9457). Switch on <code>code</code>; <code>detail</code> is for people. Validation failures also list the rejected fields, named as the client sends them.</p>
+    </div>
+    <pre class="problem">{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "The request is invalid.",
+  "code": "validation_failed",
+  "errors": [
+    { "field": "full_name", "message": "size must be between 2 and 100" }
+  ]
+}</pre>
+  </section>
+
+  <section>
+    <h2>Error codes by endpoint</h2>
+    <div class="table-scroll">
+      <table class="codes">
+        <thead>
+          <tr><th>Endpoint</th><th>Status</th><th>Code</th><th>When</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="path" rowspan="3">POST /auth/registrations</td><td class="status">400</td><td><code>validation_failed</code></td><td>Bad email, name or password</td></tr>
+          <tr><td class="status">409</td><td><code>email_taken</code></td><td>An account with this email already exists</td></tr>
+          <tr><td class="status">429</td><td><code>too_many_requests</code></td><td>A code was sent less than 2 minutes ago; wait for the <code>Retry-After</code> header's seconds</td></tr>
+          <tr><td class="path" rowspan="2">POST /auth/registrations/resend</td><td class="status">404</td><td><code>registration_not_found</code></td><td>No signup in progress for this email</td></tr>
+          <tr><td class="status">429</td><td><code>too_many_requests</code></td><td>Same 2-minute cooldown as above</td></tr>
+          <tr><td class="path" rowspan="5">POST /auth/registrations/verify</td><td class="status">400</td><td><code>invalid_code</code></td><td>Wrong code</td></tr>
+          <tr><td class="status">400</td><td><code>code_expired</code></td><td>The code is older than 10 minutes; resend</td></tr>
+          <tr><td class="status">400</td><td><code>too_many_attempts</code></td><td>5 wrong codes; this code is dead, resend</td></tr>
+          <tr><td class="status">404</td><td><code>registration_not_found</code></td><td>No signup in progress for this email</td></tr>
+          <tr><td class="status">409</td><td><code>email_taken</code></td><td>The email was registered in the meantime</td></tr>
+          <tr><td class="path">POST /auth/login</td><td class="status">400</td><td><code>invalid_credentials</code></td><td>Wrong email or password (the answer never says which)</td></tr>
+          <tr><td class="path">POST /auth/refresh</td><td class="status">400</td><td><code>invalid_refresh_token</code></td><td>Unknown, expired or already used token; send the user to login</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lead">Refresh tokens last 30 days and work once: each refresh returns a new pair. Reusing an old one logs that user out everywhere.</p>
+  </section>
+
+  <section class="ref-head">
+    <h2>Endpoints</h2>
+    <p class="lead">Open an endpoint to see its request body, response and field types. Schemas are listed at the bottom.</p>
+  </section>
+  <div id="swagger"></div>
+
+  <footer>Source: <a href="https://github.com/arthurdanielyan/CourseworkLMS-backend">CourseworkLMS-backend</a>. When the backend runs locally, the live version with “Try it out” is at <code>http://localhost:8080/swagger-ui.html</code>.</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.14/swagger-ui-bundle.js"></script>
+<script>
+  window.addEventListener("load", function () {
+    if (!window.SwaggerUIBundle) {
+      document.getElementById("swagger").textContent = "The endpoint reference could not load. Reload the page to try again.";
+      return;
+    }
+    SwaggerUIBundle({
+      url: "openapi.json",
+      dom_id: "#swagger",
+      deepLinking: true,
+      supportedSubmitMethods: [],
+      defaultModelsExpandDepth: 1,
+      docExpansion: "list",
+    });
+  });
+</script>
+</body>
+</html>

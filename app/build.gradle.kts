@@ -29,6 +29,22 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
+val apiDocsFile = rootProject.layout.projectDirectory.file("docs/api/openapi.json")
+
 tasks.test {
     useJUnitPlatform()
+    systemProperty("lms.api-docs.file", apiDocsFile.asFile.absolutePath)
+    inputs.files(apiDocsFile).withPropertyName("apiDocs")
+}
+
+tasks.register<Test>("exportApiDocs") {
+    description = "Writes the OpenAPI document of the current endpoints to docs/api/openapi.json."
+    group = "documentation"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform()
+    filter { includeTestsMatching("com.coursework.lms.ApiDocsTest") }
+    systemProperty("lms.api-docs.file", apiDocsFile.asFile.absolutePath)
+    systemProperty("lms.api-docs.write", "true")
+    outputs.upToDateWhen { false }
 }
