@@ -278,6 +278,10 @@
           "200" : {
             "content" : {
               "application/json" : {
+                "example" : [ {
+                  "id" : 4,
+                  "name" : "Ella Hovhannisyan"
+                } ],
                 "schema" : {
                   "type" : "array",
                   "items" : {
@@ -327,6 +331,13 @@
           "200" : {
             "content" : {
               "application/json" : {
+                "example" : [ {
+                  "id" : 14,
+                  "name" : "Architecture"
+                }, {
+                  "id" : 12,
+                  "name" : "Art"
+                } ],
                 "schema" : {
                   "type" : "array",
                   "items" : {
@@ -349,6 +360,16 @@
           "200" : {
             "content" : {
               "application/json" : {
+                "example" : [ {
+                  "id" : 2,
+                  "name" : "Armenian"
+                }, {
+                  "id" : 1,
+                  "name" : "English"
+                }, {
+                  "id" : 3,
+                  "name" : "Russian"
+                } ],
                 "schema" : {
                   "type" : "array",
                   "items" : {
@@ -368,9 +389,14 @@
   "components" : {
     "schemas" : {
       "BookDetailsResponse" : {
+        "type" : "object",
         "properties" : {
           "authors" : {
             "type" : "array",
+            "example" : [ {
+              "id" : 1,
+              "name" : "Robert C. Martin"
+            } ],
             "items" : {
               "$ref" : "#/components/schemas/NamedItemResponse"
             }
@@ -382,6 +408,10 @@
           },
           "categories" : {
             "type" : "array",
+            "example" : [ {
+              "id" : 2,
+              "name" : "Software Engineering"
+            } ],
             "items" : {
               "$ref" : "#/components/schemas/NamedItemResponse"
             }
@@ -400,7 +430,7 @@
             "example" : "Practical advice on writing readable, maintainable code."
           },
           "edition" : {
-            "type" : "string",
+            "type" : [ "string", "null" ],
             "example" : "1st edition"
           },
           "id" : {
@@ -409,11 +439,22 @@
             "example" : 1
           },
           "language" : {
-            "$ref" : "#/components/schemas/NamedItemResponse"
+            "$ref" : "#/components/schemas/NamedItemResponse",
+            "example" : {
+              "id" : 1,
+              "name" : "English"
+            }
           },
           "owner" : {
-            "allOf" : [ {
+            "description" : "The teacher who owns the book; null for a University Book",
+            "example" : {
+              "id" : 4,
+              "name" : "Ella Hovhannisyan"
+            },
+            "oneOf" : [ {
               "$ref" : "#/components/schemas/NamedItemResponse"
+            }, {
+              "type" : "null"
             } ]
           },
           "pdf_url" : {
@@ -427,16 +468,20 @@
             "example" : 2008
           },
           "publisher" : {
-            "$ref" : "#/components/schemas/NamedItemResponse"
+            "$ref" : "#/components/schemas/NamedItemResponse",
+            "example" : {
+              "id" : 4,
+              "name" : "Pearson"
+            }
           },
           "rating" : {
-            "type" : "number",
+            "type" : [ "number", "null" ],
             "format" : "double",
             "description" : "Average stars, rounded to one decimal; null while the book has no reviews",
             "example" : 4.7
           },
           "subtitle" : {
-            "type" : "string",
+            "type" : [ "string", "null" ],
             "example" : "A Handbook of Agile Software Craftsmanship"
           },
           "title" : {
@@ -451,6 +496,7 @@
         }
       },
       "BookSummaryResponse" : {
+        "type" : "object",
         "properties" : {
           "authors" : {
             "type" : "array",
@@ -482,13 +528,13 @@
             "example" : "Pearson"
           },
           "rating" : {
-            "type" : "number",
+            "type" : [ "number", "null" ],
             "format" : "double",
             "description" : "Average stars, rounded to one decimal; null while the book has no reviews",
             "example" : 4.7
           },
           "subtitle" : {
-            "type" : "string",
+            "type" : [ "string", "null" ],
             "example" : "A Handbook of Agile Software Craftsmanship"
           },
           "title" : {
@@ -498,6 +544,7 @@
         }
       },
       "LoginRequest" : {
+        "type" : "object",
         "properties" : {
           "email" : {
             "type" : "string",
@@ -513,6 +560,7 @@
         "required" : [ "email", "password" ]
       },
       "NamedItemResponse" : {
+        "type" : "object",
         "properties" : {
           "id" : {
             "type" : "integer",
@@ -526,6 +574,7 @@
         }
       },
       "PageMetadata" : {
+        "type" : "object",
         "properties" : {
           "number" : {
             "type" : "integer",
@@ -546,6 +595,7 @@
         }
       },
       "PageResponseBookSummaryResponse" : {
+        "type" : "object",
         "properties" : {
           "content" : {
             "type" : "array",
@@ -559,6 +609,7 @@
         }
       },
       "PendingRegistrationResponse" : {
+        "type" : "object",
         "properties" : {
           "code_expires_at" : {
             "type" : "string",
@@ -577,6 +628,7 @@
         }
       },
       "RefreshRequest" : {
+        "type" : "object",
         "properties" : {
           "refresh_token" : {
             "type" : "string",
@@ -587,6 +639,7 @@
         "required" : [ "refresh_token" ]
       },
       "ResendCodeRequest" : {
+        "type" : "object",
         "properties" : {
           "email" : {
             "type" : "string",
@@ -600,6 +653,7 @@
         "required" : [ "email" ]
       },
       "StartRegistrationRequest" : {
+        "type" : "object",
         "properties" : {
           "email" : {
             "type" : "string",
@@ -623,6 +677,7 @@
         "required" : [ "email", "full_name" ]
       },
       "TokenPairResponse" : {
+        "type" : "object",
         "properties" : {
           "access_token" : {
             "type" : "string",
@@ -635,6 +690,7 @@
         }
       },
       "VerifyCodeRequest" : {
+        "type" : "object",
         "properties" : {
           "code" : {
             "type" : "string",

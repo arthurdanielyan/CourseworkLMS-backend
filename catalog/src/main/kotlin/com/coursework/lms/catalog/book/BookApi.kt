@@ -34,9 +34,13 @@ data class BookDetailsResponse(
     val subtitle: String?,
     @field:Schema(example = "Practical advice on writing readable, maintainable code.")
     val description: String,
+    @field:Schema(example = """[{"id": 1, "name": "Robert C. Martin"}]""")
     val authors: List<NamedItemResponse>,
+    @field:Schema(example = """{"id": 4, "name": "Pearson"}""")
     val publisher: NamedItemResponse,
+    @field:Schema(example = """{"id": 1, "name": "English"}""")
     val language: NamedItemResponse,
+    @field:Schema(example = """[{"id": 2, "name": "Software Engineering"}]""")
     val categories: List<NamedItemResponse>,
     @field:Schema(example = "2008")
     val publicationYear: Int?,
@@ -54,6 +58,9 @@ data class BookDetailsResponse(
     val available: Boolean,
     @field:Schema(description = "Average stars, rounded to one decimal; null while the book has no reviews", example = "4.7")
     val rating: Double?,
-    @field:Schema(description = "The teacher who owns the book; null for a University Book")
+    @field:Schema(
+        description = "The teacher who owns the book; null for a University Book",
+        example = """{"id": 4, "name": "Ella Hovhannisyan"}""",
+    )
     val owner: NamedItemResponse?,
 )

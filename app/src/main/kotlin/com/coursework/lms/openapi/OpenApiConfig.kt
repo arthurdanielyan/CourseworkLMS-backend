@@ -38,7 +38,8 @@ class OpenApiConfig {
     fun snakeCaseModelResolver(): ModelResolver {
         // springdoc describes schemas with its own Jackson 2 mapper, which never sees the app's Jackson 3 snake_case setting.
         val mapper = Json.mapper().copy().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-        return ModelResolver(mapper)
+        // Without openapi31 an example or description next to a shared type is dropped, though springdoc writes 3.1.
+        return ModelResolver(mapper).openapi31(true)
     }
 
     @Bean
