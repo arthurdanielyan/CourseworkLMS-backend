@@ -133,7 +133,7 @@ class SecurityRulesTest : IntegrationTest() {
         assertThatThrownBy {
             asUser.run(SeedUsers.teacher.id) { jdbc ->
                 jdbc.sql("update books set title = 'Edited' where id = :id")
-                    .param("id", jdbc.firstBookOf(SeedUsers.admin.id))
+                    .param("id", jdbc.firstUniversityBook())
                     .update()
             }
         }.hasSqlState(INSUFFICIENT_PRIVILEGE)
@@ -219,6 +219,12 @@ class SecurityRulesTest : IntegrationTest() {
     private fun JdbcClient.firstBookOf(ownerId: Int): Int {
         return sql("select id from books where added_by = :owner order by id limit 1")
             .param("owner", ownerId)
+            .query(Int::class.java)
+            .single()
+    }
+
+    private fun JdbcClient.firstUniversityBook(): Int {
+        return sql("select id from books where added_by is null order by id limit 1")
             .query(Int::class.java)
             .single()
     }

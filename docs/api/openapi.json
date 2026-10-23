@@ -152,10 +152,351 @@
         "security" : [ ],
         "tags" : [ "registration-controller" ]
       }
+    },
+    "/api/v1/books" : {
+      "get" : {
+        "operationId" : "search",
+        "parameters" : [ {
+          "description" : "Text in the title, the subtitle or an author's name, ignoring case",
+          "example" : "clean code",
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "description" : "Text in an author's name, ignoring case",
+          "example" : "martin",
+          "in" : "query",
+          "name" : "author",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "example" : 2008,
+          "in" : "query",
+          "name" : "publication_year",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "Books in any of these categories; repeat the parameter for more than one",
+          "in" : "query",
+          "name" : "category_id",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }, {
+          "description" : "Books in any of these languages; repeat the parameter for more than one",
+          "in" : "query",
+          "name" : "language_id",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }, {
+          "description" : "true: only Available books; false: only Unavailable ones; leave out for both",
+          "in" : "query",
+          "name" : "available",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "description" : "Books owned by any of these teachers; repeat the parameter for more than one",
+          "in" : "query",
+          "name" : "owner_id",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }, {
+          "description" : "true: University Books match too, alongside any owner_id books",
+          "in" : "query",
+          "name" : "university",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseBookSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "book-controller" ]
+      }
+    },
+    "/api/v1/books/owners" : {
+      "get" : {
+        "operationId" : "owners",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/NamedItemResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The teachers who own at least one book, sorted by name; University Books are filtered by `university=true` instead",
+        "tags" : [ "catalog-lookup-controller" ]
+      }
+    },
+    "/api/v1/books/{id}" : {
+      "get" : {
+        "operationId" : "details",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BookDetailsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "book-controller" ]
+      }
+    },
+    "/api/v1/categories" : {
+      "get" : {
+        "operationId" : "categories",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/NamedItemResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Every category, sorted by name",
+        "tags" : [ "catalog-lookup-controller" ]
+      }
+    },
+    "/api/v1/languages" : {
+      "get" : {
+        "operationId" : "languages",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/NamedItemResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Every book language, sorted by name",
+        "tags" : [ "catalog-lookup-controller" ]
+      }
     }
   },
   "components" : {
     "schemas" : {
+      "BookDetailsResponse" : {
+        "properties" : {
+          "authors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NamedItemResponse"
+            }
+          },
+          "available" : {
+            "type" : "boolean",
+            "description" : "Whether at least one copy can be reserved now",
+            "example" : true
+          },
+          "categories" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NamedItemResponse"
+            }
+          },
+          "copies_available" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 3
+          },
+          "cover_image_url" : {
+            "type" : "string",
+            "example" : "https://covers.openlibrary.org/b/id/8430006-L.jpg"
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "Practical advice on writing readable, maintainable code."
+          },
+          "edition" : {
+            "type" : "string",
+            "example" : "1st edition"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 1
+          },
+          "language" : {
+            "$ref" : "#/components/schemas/NamedItemResponse"
+          },
+          "owner" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/NamedItemResponse"
+            } ]
+          },
+          "pdf_url" : {
+            "type" : "string",
+            "description" : "Download link; null when the book has no PDF",
+            "example" : "https://archive.org/download/opensource/library_resource_21.pdf"
+          },
+          "publication_year" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 2008
+          },
+          "publisher" : {
+            "$ref" : "#/components/schemas/NamedItemResponse"
+          },
+          "rating" : {
+            "type" : "number",
+            "format" : "double",
+            "description" : "Average stars, rounded to one decimal; null while the book has no reviews",
+            "example" : 4.7
+          },
+          "subtitle" : {
+            "type" : "string",
+            "example" : "A Handbook of Agile Software Craftsmanship"
+          },
+          "title" : {
+            "type" : "string",
+            "example" : "Clean Code"
+          },
+          "total_copies" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 6
+          }
+        }
+      },
+      "BookSummaryResponse" : {
+        "properties" : {
+          "authors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "example" : "Robert C. Martin"
+            }
+          },
+          "available" : {
+            "type" : "boolean",
+            "description" : "Whether at least one copy can be reserved now",
+            "example" : true
+          },
+          "cover_image_url" : {
+            "type" : "string",
+            "example" : "https://covers.openlibrary.org/b/id/8430006-L.jpg"
+          },
+          "has_pdf" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 1
+          },
+          "publisher" : {
+            "type" : "string",
+            "example" : "Pearson"
+          },
+          "rating" : {
+            "type" : "number",
+            "format" : "double",
+            "description" : "Average stars, rounded to one decimal; null while the book has no reviews",
+            "example" : 4.7
+          },
+          "subtitle" : {
+            "type" : "string",
+            "example" : "A Handbook of Agile Software Craftsmanship"
+          },
+          "title" : {
+            "type" : "string",
+            "example" : "Clean Code"
+          }
+        }
+      },
       "LoginRequest" : {
         "properties" : {
           "email" : {
@@ -170,6 +511,52 @@
           }
         },
         "required" : [ "email", "password" ]
+      },
+      "NamedItemResponse" : {
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 2
+          },
+          "name" : {
+            "type" : "string",
+            "example" : "Software Engineering"
+          }
+        }
+      },
+      "PageMetadata" : {
+        "properties" : {
+          "number" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "total_elements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "total_pages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "PageResponseBookSummaryResponse" : {
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BookSummaryResponse"
+            }
+          },
+          "page" : {
+            "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
       },
       "PendingRegistrationResponse" : {
         "properties" : {

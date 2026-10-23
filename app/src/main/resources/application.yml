@@ -36,6 +36,7 @@ lms:
 springdoc:
   default-produces-media-type: application/json
   writer-with-order-by-keys: true
+  default-flat-param-object: true
   swagger-ui:
     path: /swagger-ui.html
 

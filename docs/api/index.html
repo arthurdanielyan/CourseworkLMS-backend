@@ -105,7 +105,7 @@
   <header>
     <span class="eyebrow">Library Management System · API v1</span>
     <h1>LMS API Reference</h1>
-    <p class="lead">What the backend accepts and returns today: account access (signup with an email code, login, token refresh). Generated from the backend's code on every change to the endpoints. This page is read-only and cannot send requests.</p>
+    <p class="lead">What the backend accepts and returns today: account access (signup with an email code, login, token refresh) and the book catalog (search with filters, book details, filter lists). Generated from the backend's code on every change to the endpoints. This page is read-only and cannot send requests.</p>
   </header>
 
   <section>
@@ -115,7 +115,9 @@
       <li>Authenticated requests send <code>Authorization: Bearer &lt;access_token&gt;</code>. The <code>/api/v1/auth/**</code> endpoints need no token.</li>
       <li>A signup only accepts <code>@polytechnic.am</code> emails. The server picks the role: teacher for emails on the teacher list, student for everyone else.</li>
       <li>Passwords are 8–72 characters, with upper and lower case letters, at least 2 digits and at least 1 special character.</li>
-      <li>Lists will be paged with <code>?page=0&amp;size=20</code> (page counts from 0, size up to 100).</li>
+      <li>Lists are paged with <code>?page=0&amp;size=20</code> (page counts from 0, size up to 100). The filter lists (categories, languages, owners) are short and come whole.</li>
+      <li>A filter that takes several values repeats the parameter: <code>?category_id=2&amp;category_id=3</code>. Values of one filter match if any of them matches; different filters must all match.</li>
+      <li>A book with no owner is a University Book: <code>owner</code> is <code>null</code>, and the search finds them with <code>university=true</code>.</li>
     </ul>
     <p class="callout"><strong>401 means only one thing:</strong> the access token is missing, expired or invalid. Call <code>POST /api/v1/auth/refresh</code> with the refresh token, store the new pair, and retry. Wrong passwords, bad codes and bad refresh tokens answer 400, so a refresh loop can't happen. Logged in but not allowed is 403.</p>
   </section>
@@ -157,6 +159,8 @@
           <tr><td class="status">409</td><td><code>email_taken</code></td><td>The email was registered in the meantime</td></tr>
           <tr><td class="path">POST /auth/login</td><td class="status">400</td><td><code>invalid_credentials</code></td><td>Wrong email or password (the answer never says which)</td></tr>
           <tr><td class="path">POST /auth/refresh</td><td class="status">400</td><td><code>invalid_refresh_token</code></td><td>Unknown, expired or already used token; send the user to login</td></tr>
+          <tr><td class="path">GET /books</td><td class="status">400</td><td><code>bad_request</code></td><td>A filter value of the wrong type, such as <code>available=maybe</code></td></tr>
+          <tr><td class="path">GET /books/{id}</td><td class="status">404</td><td><code>not_found</code></td><td>No book with this id</td></tr>
         </tbody>
       </table>
     </div>
