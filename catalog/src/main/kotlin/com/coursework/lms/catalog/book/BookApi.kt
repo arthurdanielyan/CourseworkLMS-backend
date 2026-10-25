@@ -23,6 +23,8 @@ data class BookSummaryResponse(
     val rating: Double?,
     @field:Schema(description = "Whether at least one copy can be reserved now", example = "true")
     val available: Boolean,
+    @field:Schema(description = "Whether the logged-in user has this book in their Favourites", example = "false")
+    val favourite: Boolean,
 )
 
 data class BookDetailsResponse(
@@ -63,4 +65,6 @@ data class BookDetailsResponse(
         example = """{"id": 4, "name": "Ella Hovhannisyan"}""",
     )
     val owner: NamedItemResponse?,
+    @field:Schema(description = "Whether the logged-in user has this book in their Favourites", example = "false")
+    val favourite: Boolean,
 )

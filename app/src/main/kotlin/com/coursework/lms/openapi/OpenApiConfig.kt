@@ -1,5 +1,6 @@
 package com.coursework.lms.openapi
 
+import com.coursework.lms.core.security.CurrentUser
 import com.coursework.lms.core.security.PublicEndpoints
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import io.swagger.v3.core.jackson.ModelResolver
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import org.springdoc.core.customizers.OpenApiCustomizer
+import org.springdoc.core.utils.SpringDocUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.server.PathContainer
@@ -17,6 +19,11 @@ import org.springframework.web.util.pattern.PathPatternParser
 
 @Configuration
 class OpenApiConfig {
+
+    init {
+        // The logged-in user comes from the token, but flattened parameter objects would list its fields as query parameters.
+        SpringDocUtils.getConfig().addRequestWrapperToIgnore(CurrentUser::class.java)
+    }
 
     @Bean
     fun openApi(): OpenAPI {

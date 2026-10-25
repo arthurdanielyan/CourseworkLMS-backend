@@ -72,6 +72,10 @@ _Avoid_: max reservation days, loan period, borrowing limit
 A book an Admin deleted while some of its copies were still Borrowed; it is invisible to everyone and is removed for good once the last copy is Returned.
 _Avoid_: soft-deleted book, archived book
 
+**Favourite**:
+A book a user has marked to find again quickly. Visible only to that user, and gone when the book or the user is deleted.
+_Avoid_: bookmark, saved book, wishlist
+
 ### Circulation
 
 **Reservation**:

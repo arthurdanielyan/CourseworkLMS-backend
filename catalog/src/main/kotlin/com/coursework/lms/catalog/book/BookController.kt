@@ -2,9 +2,11 @@ package com.coursework.lms.catalog.book
 
 import com.coursework.lms.core.paging.PageQuery
 import com.coursework.lms.core.paging.PageResponse
+import com.coursework.lms.core.security.CurrentUser
 import io.swagger.v3.oas.annotations.Parameter
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -48,6 +50,7 @@ class BookController(
         @RequestParam(defaultValue = "false")
         university: Boolean,
         @Valid @ModelAttribute pageQuery: PageQuery,
+        @AuthenticationPrincipal user: CurrentUser,
     ): PageResponse<BookSummaryResponse> {
         val search = BookSearch(
             text = q?.trim()?.takeIf { it.isNotEmpty() },
@@ -59,11 +62,14 @@ class BookController(
             ownerIds = ownerIds.orEmpty(),
             universityBooks = university,
         )
-        return bookCatalogService.search(search, pageQuery).map(bookSummaryResponseMapper::map)
+        return bookCatalogService.search(search, user.id, pageQuery).map(bookSummaryResponseMapper::map)
     }
 
     @GetMapping("/{id}")
-    fun details(@PathVariable id: Int): BookDetailsResponse {
-        return bookDetailsResponseMapper.map(bookCatalogService.details(id))
+    fun details(
+        @PathVariable id: Int,
+        @AuthenticationPrincipal user: CurrentUser,
+    ): BookDetailsResponse {
+        return bookDetailsResponseMapper.map(bookCatalogService.details(id, user.id))
     }
 }

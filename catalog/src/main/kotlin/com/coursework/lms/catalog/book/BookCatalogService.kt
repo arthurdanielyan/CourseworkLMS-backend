@@ -28,52 +28,54 @@ import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.jdbc.Query
 import org.jetbrains.exposed.v1.jdbc.select
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class BookCatalogService {
+class BookCatalogService(
+    private val favouriteBooks: FavouriteBooks,
+) {
 
     @Transactional(readOnly = true)
     fun search(
         search: BookSearch,
+        userId: Int,
         pageQuery: PageQuery,
     ): PageResponse<BookSummary> {
-        val rows = BooksTable
-            .join(PublishersTable, JoinType.INNER, BooksTable.publisherId, PublishersTable.id)
-            .select(
-                BooksTable.id,
-                BooksTable.title,
-                BooksTable.subtitle,
-                BooksTable.coverImageUrl,
-                BooksTable.pdfUrl,
-                BooksTable.rating,
-                BooksTable.copiesAvailable,
-                PublishersTable.name,
-            )
+        val rows = summaryQuery()
             .where { matching(search) }
             .orderBy(BooksTable.title to SortOrder.ASC, BooksTable.id to SortOrder.ASC)
             .toPage(pageQuery) { it }
-        val authors = authorsOf(rows.content.map { it[BooksTable.id] })
-        return rows.map { row ->
-            BookSummary(
-                id = row[BooksTable.id],
-                title = row[BooksTable.title],
-                subtitle = row[BooksTable.subtitle],
-                authors = authors[row[BooksTable.id]].orEmpty().map { it.name },
-                publisher = row[PublishersTable.name],
-                coverImageUrl = row[BooksTable.coverImageUrl],
-                hasPdf = row[BooksTable.pdfUrl] != null,
-                rating = row[BooksTable.rating],
-                available = row[BooksTable.copiesAvailable] > 0,
-            )
+        return PageResponse(
+            content = summariesOf(rows.content, userId),
+            page = rows.page,
+        )
+    }
+
+    /** The books with [bookIds], in that order; ids of books that don't exist are left out. */
+    @Transactional(readOnly = true)
+    fun summaries(
+        bookIds: List<Int>,
+        userId: Int,
+    ): List<BookSummary> {
+        if (bookIds.isEmpty()) {
+            return emptyList()
         }
+        val rows = summaryQuery()
+            .where { BooksTable.id inList bookIds }
+            .associateBy { it[BooksTable.id] }
+        return summariesOf(bookIds.mapNotNull { rows[it] }, userId)
     }
 
     @Transactional(readOnly = true)
-    fun details(bookId: Int): BookDetails {
+    fun details(
+        bookId: Int,
+        userId: Int,
+    ): BookDetails {
         val row = BooksTable
             .join(PublishersTable, JoinType.INNER, BooksTable.publisherId, PublishersTable.id)
             .join(BookLanguagesTable, JoinType.INNER, BooksTable.languageId, BookLanguagesTable.id)
@@ -111,7 +113,46 @@ class BookCatalogService {
             copiesAvailable = row[BooksTable.copiesAvailable],
             rating = row[BooksTable.rating],
             owner = ownerId?.let { NamedItem(it, row[UsersTable.username]) },
+            favourite = bookId in favouriteBooks.favouredBy(userId, listOf(bookId)),
         )
+    }
+
+    private fun summaryQuery(): Query {
+        return BooksTable
+            .join(PublishersTable, JoinType.INNER, BooksTable.publisherId, PublishersTable.id)
+            .select(
+                BooksTable.id,
+                BooksTable.title,
+                BooksTable.subtitle,
+                BooksTable.coverImageUrl,
+                BooksTable.pdfUrl,
+                BooksTable.rating,
+                BooksTable.copiesAvailable,
+                PublishersTable.name,
+            )
+    }
+
+    private fun summariesOf(
+        rows: List<ResultRow>,
+        userId: Int,
+    ): List<BookSummary> {
+        val bookIds = rows.map { it[BooksTable.id] }
+        val authors = authorsOf(bookIds)
+        val favourites = favouriteBooks.favouredBy(userId, bookIds)
+        return rows.map { row ->
+            BookSummary(
+                id = row[BooksTable.id],
+                title = row[BooksTable.title],
+                subtitle = row[BooksTable.subtitle],
+                authors = authors[row[BooksTable.id]].orEmpty().map { it.name },
+                publisher = row[PublishersTable.name],
+                coverImageUrl = row[BooksTable.coverImageUrl],
+                hasPdf = row[BooksTable.pdfUrl] != null,
+                rating = row[BooksTable.rating],
+                available = row[BooksTable.copiesAvailable] > 0,
+                favourite = row[BooksTable.id] in favourites,
+            )
+        }
     }
 
     private fun matching(search: BookSearch): Op<Boolean> {

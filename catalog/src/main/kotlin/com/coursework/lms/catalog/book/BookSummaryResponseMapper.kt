@@ -16,6 +16,7 @@ class BookSummaryResponseMapper {
             hasPdf = from.hasPdf,
             rating = roundRating(from.rating),
             available = from.available,
+            favourite = from.favourite,
         )
     }
 }

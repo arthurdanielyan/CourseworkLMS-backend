@@ -353,6 +353,85 @@
         "tags" : [ "catalog-lookup-controller" ]
       }
     },
+    "/api/v1/favourites" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseBookSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The logged-in user's Favourites, the most recently added first",
+        "tags" : [ "favourite-controller" ]
+      }
+    },
+    "/api/v1/favourites/{book_id}" : {
+      "delete" : {
+        "operationId" : "remove",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Removes a book from the Favourites; removing one that isn't there changes nothing",
+        "tags" : [ "favourite-controller" ]
+      },
+      "put" : {
+        "operationId" : "add",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Adds a book to the Favourites; adding it again changes nothing",
+        "tags" : [ "favourite-controller" ]
+      }
+    },
     "/api/v1/languages" : {
       "get" : {
         "operationId" : "languages",
@@ -432,6 +511,11 @@
           "edition" : {
             "type" : [ "string", "null" ],
             "example" : "1st edition"
+          },
+          "favourite" : {
+            "type" : "boolean",
+            "description" : "Whether the logged-in user has this book in their Favourites",
+            "example" : false
           },
           "id" : {
             "type" : "integer",
@@ -513,6 +597,11 @@
           "cover_image_url" : {
             "type" : "string",
             "example" : "https://covers.openlibrary.org/b/id/8430006-L.jpg"
+          },
+          "favourite" : {
+            "type" : "boolean",
+            "description" : "Whether the logged-in user has this book in their Favourites",
+            "example" : false
           },
           "has_pdf" : {
             "type" : "boolean",

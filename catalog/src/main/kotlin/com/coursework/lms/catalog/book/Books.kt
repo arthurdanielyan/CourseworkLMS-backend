@@ -24,6 +24,7 @@ data class BookSummary(
     val hasPdf: Boolean,
     val rating: Float?,
     val available: Boolean,
+    val favourite: Boolean,
 )
 
 /** [owner] is null for a University Book. */
@@ -44,6 +45,7 @@ data class BookDetails(
     val copiesAvailable: Int,
     val rating: Float?,
     val owner: NamedItem?,
+    val favourite: Boolean,
 ) {
 
     val available: Boolean

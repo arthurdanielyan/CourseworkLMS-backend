@@ -27,6 +27,7 @@ class BookDetailsResponseMapper(
             available = from.available,
             rating = roundRating(from.rating),
             owner = from.owner?.let(namedItemResponseMapper::map),
+            favourite = from.favourite,
         )
     }
 }
