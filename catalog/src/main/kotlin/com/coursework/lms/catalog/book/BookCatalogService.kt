@@ -117,6 +117,19 @@ class BookCatalogService(
         )
     }
 
+    /** Throws a `not_found` problem when there is no book with [bookId]. */
+    @Transactional(readOnly = true)
+    fun requireBook(bookId: Int) {
+        val exists = BooksTable.select(BooksTable.id).where { BooksTable.id eq bookId }.any()
+        if (!exists) {
+            throw ApiException(
+                status = HttpStatus.NOT_FOUND,
+                code = ErrorCode.NOT_FOUND,
+                detail = "There is no book with id $bookId.",
+            )
+        }
+    }
+
     private fun summaryQuery(): Query {
         return BooksTable
             .join(PublishersTable, JoinType.INNER, BooksTable.publisherId, PublishersTable.id)

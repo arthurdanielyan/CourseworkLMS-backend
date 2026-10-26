@@ -297,6 +297,150 @@
         "tags" : [ "catalog-lookup-controller" ]
       }
     },
+    "/api/v1/books/{book_id}/reviews" : {
+      "get" : {
+        "operationId" : "list_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "description" : "Only Reviews with these stars; repeat the parameter for more than one. Positive Reviews are stars=4&stars=5, Critical ones stars=1&stars=2.",
+          "in" : "query",
+          "name" : "stars",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseReviewResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "A book's Reviews, newest first",
+        "tags" : [ "review-controller" ]
+      }
+    },
+    "/api/v1/books/{book_id}/reviews/mine" : {
+      "delete" : {
+        "operationId" : "deleteMine",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Deletes the logged-in user's Review of a book; deleting one that isn't there changes nothing",
+        "tags" : [ "review-controller" ]
+      },
+      "put" : {
+        "operationId" : "writeMine",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReviewResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Writes the logged-in user's Review of a book, replacing their earlier one",
+        "tags" : [ "review-controller" ]
+      }
+    },
+    "/api/v1/books/{book_id}/reviews/summary" : {
+      "get" : {
+        "operationId" : "summary",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReviewSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "How many Reviews a book has for each number of stars, and the logged-in user's own",
+        "tags" : [ "review-controller" ]
+      }
+    },
     "/api/v1/books/{id}" : {
       "get" : {
         "operationId" : "details",
@@ -462,6 +606,27 @@
         },
         "summary" : "Every book language, sorted by name",
         "tags" : [ "catalog-lookup-controller" ]
+      }
+    },
+    "/api/v1/reviews/{id}" : {
+      "delete" : {
+        "operationId" : "delete",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Deletes anyone's Review; admins only",
+        "tags" : [ "review-controller" ]
       }
     }
   },
@@ -697,6 +862,20 @@
           }
         }
       },
+      "PageResponseReviewResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ReviewResponse"
+            }
+          },
+          "page" : {
+            "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
+      },
       "PendingRegistrationResponse" : {
         "type" : "object",
         "properties" : {
@@ -740,6 +919,107 @@
           }
         },
         "required" : [ "email" ]
+      },
+      "ReviewRequest" : {
+        "type" : "object",
+        "properties" : {
+          "stars" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 5,
+            "maximum" : 5,
+            "minimum" : 1
+          },
+          "text" : {
+            "type" : [ "string", "null" ],
+            "description" : "Optional; leave it out to give only stars",
+            "example" : "Clear, practical and worth rereading.",
+            "maxLength" : 2000,
+            "minLength" : 0
+          }
+        }
+      },
+      "ReviewResponse" : {
+        "type" : "object",
+        "properties" : {
+          "author" : {
+            "$ref" : "#/components/schemas/NamedItemResponse",
+            "example" : {
+              "id" : 2,
+              "name" : "Hakob Karapetyan"
+            }
+          },
+          "created_at" : {
+            "type" : "string",
+            "format" : "date",
+            "example" : "2026-04-09"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 12
+          },
+          "mine" : {
+            "type" : "boolean",
+            "description" : "Whether the logged-in user wrote it",
+            "example" : false
+          },
+          "stars" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 5
+          },
+          "text" : {
+            "type" : [ "string", "null" ],
+            "description" : "null when the reviewer gave only stars",
+            "example" : "Clear, practical and worth rereading."
+          }
+        }
+      },
+      "ReviewSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "average" : {
+            "type" : [ "number", "null" ],
+            "format" : "double",
+            "description" : "Average stars, rounded to one decimal; null while there are no Reviews",
+            "example" : 4.7
+          },
+          "five_stars" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 2
+          },
+          "four_stars" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 1
+          },
+          "my_review" : {
+            "$ref" : "#/components/schemas/ReviewResponse",
+            "description" : "The logged-in user's own Review; null if they haven't written one"
+          },
+          "one_star" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 0
+          },
+          "three_stars" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 0
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 3
+          },
+          "two_stars" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 0
+          }
+        }
       },
       "StartRegistrationRequest" : {
         "type" : "object",

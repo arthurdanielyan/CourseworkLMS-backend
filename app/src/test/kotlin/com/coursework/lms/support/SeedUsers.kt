@@ -2,13 +2,13 @@ package com.coursework.lms.support
 
 import com.coursework.lms.core.security.CurrentUser
 
-/** The users V1 seeds, with the permissions their roles hold after V2. */
+/** The users V1 seeds, with the permissions their roles hold after all migrations. */
 object SeedUsers {
 
     val admin = CurrentUser(
         id = 1,
         role = "admin",
-        permissions = setOf("books.view", "books.add", "books.delete", "books.edit", "users.manage"),
+        permissions = setOf("books.view", "books.add", "books.delete", "books.edit", "users.manage", "reviews.moderate"),
     )
 
     val student = CurrentUser(

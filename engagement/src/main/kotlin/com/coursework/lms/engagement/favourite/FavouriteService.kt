@@ -2,9 +2,6 @@ package com.coursework.lms.engagement.favourite
 
 import com.coursework.lms.catalog.book.BookCatalogService
 import com.coursework.lms.catalog.book.BookSummary
-import com.coursework.lms.catalog.db.BooksTable
-import com.coursework.lms.core.error.ApiException
-import com.coursework.lms.core.error.ErrorCode
 import com.coursework.lms.core.paging.PageQuery
 import com.coursework.lms.core.paging.PageResponse
 import com.coursework.lms.core.paging.toPage
@@ -15,7 +12,6 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insertIgnore
 import org.jetbrains.exposed.v1.jdbc.select
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -46,14 +42,7 @@ class FavouriteService(
         userId: Int,
         bookId: Int,
     ) {
-        val bookExists = BooksTable.select(BooksTable.id).where { BooksTable.id eq bookId }.any()
-        if (!bookExists) {
-            throw ApiException(
-                status = HttpStatus.NOT_FOUND,
-                code = ErrorCode.NOT_FOUND,
-                detail = "There is no book with id $bookId.",
-            )
-        }
+        bookCatalogService.requireBook(bookId)
         UsersFavouritesTable.insertIgnore {
             it[UsersFavouritesTable.userId] = userId
             it[UsersFavouritesTable.bookId] = bookId

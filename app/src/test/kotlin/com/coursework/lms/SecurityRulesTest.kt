@@ -178,9 +178,14 @@ class SecurityRulesTest : IntegrationTest() {
     @Test
     fun `students reserve and review books they do not own`() {
         val (copiesBefore, copiesAfter, rating) = asUser.run(SeedUsers.otherStudent.id) { jdbc ->
-            val book = jdbc.sql("select id from books where copies_available > 0 order by id limit 1")
-                .query(Int::class.java)
-                .single()
+            val book = jdbc.sql(
+                """
+                select id from books b
+                where copies_available > 0
+                  and not exists (select 1 from book_reviews r where r.book_id = b.id and r.user_id = 3)
+                order by id limit 1
+                """,
+            ).query(Int::class.java).single()
             val before = jdbc.copiesAvailable(book)
             jdbc.sql("insert into reservations (user_id, book_id, return_deadline) values (3, :book, current_date + 14)")
                 .param("book", book)
