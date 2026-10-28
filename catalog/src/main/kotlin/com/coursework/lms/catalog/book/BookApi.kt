@@ -58,6 +58,8 @@ data class BookDetailsResponse(
     val copiesAvailable: Int,
     @field:Schema(description = "Whether at least one copy can be reserved now", example = "true")
     val available: Boolean,
+    @field:Schema(description = "Max Loan Days: a reservation's return date can be at most this many days after today", example = "14")
+    val maxLoanDays: Int,
     @field:Schema(description = "Average stars, rounded to one decimal; null while the book has no reviews", example = "4.7")
     val rating: Double?,
     @field:Schema(

@@ -19,7 +19,7 @@ class BookDetailsTest : IntegrationTest() {
             jsonPath("$.language.name") { value("English") }
             jsonPath("$.categories[0].name") { value("Software Engineering") }
             jsonPath("$.total_copies") { value(6) }
-            jsonPath("$.copies_available") { value(3) }
+            jsonPath("$.copies_available") { value(6) }
             jsonPath("$.available") { value(true) }
             jsonPath("$.pdf_url") { value(null) }
             jsonPath("$.owner") { value(null) }

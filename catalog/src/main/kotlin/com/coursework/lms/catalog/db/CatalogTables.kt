@@ -5,6 +5,7 @@ import org.jetbrains.exposed.v1.core.ReferenceOption.CASCADE
 import org.jetbrains.exposed.v1.core.ReferenceOption.NO_ACTION
 import org.jetbrains.exposed.v1.core.ReferenceOption.SET_NULL
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.greaterEq
 
 object PublishersTable : Table("publishers") {
 
@@ -61,6 +62,8 @@ object BooksTable : Table("books") {
     val languageId = integer("language_id")
         .references(BookLanguagesTable.id, onDelete = NO_ACTION, onUpdate = CASCADE, fkName = "language_id")
     val maxLoanDays = integer("max_reservation_days")
+        .default(14)
+        .check("books_max_reservation_days_check") { it greaterEq 1 }
 
     override val primaryKey = PrimaryKey(id, name = "books_pk")
 }

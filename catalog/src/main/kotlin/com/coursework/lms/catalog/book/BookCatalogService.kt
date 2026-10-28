@@ -111,6 +111,7 @@ class BookCatalogService(
             pdfUrl = row[BooksTable.pdfUrl],
             totalCopies = row[BooksTable.totalCopies],
             copiesAvailable = row[BooksTable.copiesAvailable],
+            maxLoanDays = row[BooksTable.maxLoanDays],
             rating = row[BooksTable.rating],
             owner = ownerId?.let { NamedItem(it, row[UsersTable.username]) },
             favourite = bookId in favouriteBooks.favouredBy(userId, listOf(bookId)),

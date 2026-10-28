@@ -105,7 +105,7 @@
   <header>
     <span class="eyebrow">Library Management System · API v1</span>
     <h1>LMS API Reference</h1>
-    <p class="lead">What the backend accepts and returns today: account access (signup with an email code, login, token refresh) the book catalog (search with filters, book details, filter lists), Favourites and Reviews. Generated from the backend's code on every change to the endpoints. This page is read-only and cannot send requests.</p>
+    <p class="lead">What the backend accepts and returns today: account access (signup with an email code, login, token refresh) the book catalog (search with filters, book details, filter lists), Favourites, Reviews, Reservations and the Waitlist. Generated from the backend's code on every change to the endpoints. This page is read-only and cannot send requests.</p>
   </header>
 
   <section>
@@ -120,6 +120,8 @@
       <li>A book with no owner is a University Book: <code>owner</code> is <code>null</code>, and the search finds them with <code>university=true</code>.</li>
       <li>Every book carries <code>favourite</code> for the logged-in user. <code>PUT</code> and <code>DELETE /api/v1/favourites/{book_id}</code> answer 204 even when nothing changes, so the heart button can send them without checking first.</li>
       <li>Each user has at most one Review per book, at <code>/api/v1/books/{book_id}/reviews/mine</code>: <code>PUT</code> writes or replaces it, <code>DELETE</code> removes it. The Positive filter is <code>stars=4&amp;stars=5</code>, the Critical one <code>stars=1&amp;stars=2</code>.</li>
+      <li>A Reservation goes <code>reserved</code> → <code>borrowed</code> (an admin hands the copy over) → <code>returned</code> (an admin takes it back). A <code>reserved</code> one becomes <code>cancelled</code> when its user cancels it, or <code>expired</code> when nobody picks it up by <code>pickup_deadline</code>, 48 hours after reserving. The return date is chosen when reserving: after today and at most the book's <code>max_loan_days</code> from today, counted in Yerevan time.</li>
+      <li>An Unavailable book has a Waitlist. When a copy comes back, it is held for the first user in line for 24 hours: their entry in <code>/api/v1/waitlist/mine</code> gets <code>offer_expires_at</code>. They accept by reserving the book as usual, and decline by leaving the waitlist. Unanswered, the copy passes to the next in line, or back on the shelf when nobody is waiting.</li>
     </ul>
     <p class="callout"><strong>401 means only one thing:</strong> the access token is missing, expired or invalid. Call <code>POST /api/v1/auth/refresh</code> with the refresh token, store the new pair, and retry. Wrong passwords, bad codes and bad refresh tokens answer 400, so a refresh loop can't happen. Logged in but not allowed is 403.</p>
   </section>
@@ -168,6 +170,19 @@
           <tr><td class="status">404</td><td><code>not_found</code></td><td>No book with this id (the other review endpoints of a book answer the same)</td></tr>
           <tr><td class="path" rowspan="2">DELETE /reviews/{id}</td><td class="status">403</td><td><code>access_denied</code></td><td>Only admins delete other people's Reviews</td></tr>
           <tr><td class="status">404</td><td><code>not_found</code></td><td>No review with this id</td></tr>
+          <tr><td class="path" rowspan="5">POST /books/{book_id}/reservations</td><td class="status">400</td><td><code>invalid_return_date</code></td><td>The return date is today or earlier, or beyond the book's <code>max_loan_days</code></td></tr>
+          <tr><td class="status">403</td><td><code>access_denied</code></td><td>Admins don't reserve books</td></tr>
+          <tr><td class="status">404</td><td><code>not_found</code></td><td>No book with this id</td></tr>
+          <tr><td class="status">409</td><td><code>already_reserved</code></td><td>You already have this book reserved or borrowed</td></tr>
+          <tr><td class="status">409</td><td><code>no_copies_available</code></td><td>Every copy is taken right now</td></tr>
+          <tr><td class="path" rowspan="2">POST /reservations/{id}/cancel</td><td class="status">404</td><td><code>not_found</code></td><td>No reservation of yours with this id</td></tr>
+          <tr><td class="status">409</td><td><code>invalid_status</code></td><td>Only a <code>reserved</code> one can be cancelled</td></tr>
+          <tr><td class="path" rowspan="2">POST /reservations/{id}/hand-over, /return</td><td class="status">403</td><td><code>access_denied</code></td><td>Admins only</td></tr>
+          <tr><td class="status">409</td><td><code>invalid_status</code></td><td>Hand-over needs <code>reserved</code>, return needs <code>borrowed</code></td></tr>
+          <tr><td class="path" rowspan="4">POST /books/{book_id}/waitlist</td><td class="status">404</td><td><code>not_found</code></td><td>No book with this id</td></tr>
+          <tr><td class="status">409</td><td><code>book_available</code></td><td>The book has free copies, so reserve it instead</td></tr>
+          <tr><td class="status">409</td><td><code>already_reserved</code></td><td>You already have this book reserved or borrowed</td></tr>
+          <tr><td class="status">409</td><td><code>already_waiting</code></td><td>You are already in line for this book</td></tr>
         </tbody>
       </table>
     </div>

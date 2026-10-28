@@ -297,9 +297,47 @@
         "tags" : [ "catalog-lookup-controller" ]
       }
     },
+    "/api/v1/books/{book_id}/reservations" : {
+      "post" : {
+        "operationId" : "reserve",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReserveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReservationResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Reserves a copy of a book for the logged-in user, to be picked up within the Pickup Window",
+        "tags" : [ "reservation-controller" ]
+      }
+    },
     "/api/v1/books/{book_id}/reviews" : {
       "get" : {
-        "operationId" : "list_1",
+        "operationId" : "list_2",
         "parameters" : [ {
           "in" : "path",
           "name" : "book_id",
@@ -441,6 +479,53 @@
         "tags" : [ "review-controller" ]
       }
     },
+    "/api/v1/books/{book_id}/waitlist" : {
+      "delete" : {
+        "operationId" : "leave",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Takes the logged-in user out of line, declining their Offer if they hold one",
+        "tags" : [ "waitlist-controller" ]
+      },
+      "post" : {
+        "operationId" : "join",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "book_id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WaitlistEntryResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Puts the logged-in user in line for an Unavailable book",
+        "tags" : [ "waitlist-controller" ]
+      }
+    },
     "/api/v1/books/{id}" : {
       "get" : {
         "operationId" : "details",
@@ -499,7 +584,7 @@
     },
     "/api/v1/favourites" : {
       "get" : {
-        "operationId" : "list",
+        "operationId" : "list_1",
         "parameters" : [ {
           "in" : "query",
           "name" : "page",
@@ -608,6 +693,215 @@
         "tags" : [ "catalog-lookup-controller" ]
       }
     },
+    "/api/v1/reservations" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [ {
+          "description" : "Only these statuses; repeat the parameter for more than one",
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "description" : "true: only Overdue ones (borrowed and past their return deadline)",
+          "in" : "query",
+          "name" : "overdue",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "in" : "query",
+          "name" : "user_id",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "in" : "query",
+          "name" : "book_id",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseReservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Everyone's Reservations, the newest first; admins only",
+        "tags" : [ "reservation-controller" ]
+      }
+    },
+    "/api/v1/reservations/mine" : {
+      "get" : {
+        "operationId" : "mine_1",
+        "parameters" : [ {
+          "description" : "Only these statuses; repeat the parameter for more than one, e.g. status=reserved&status=borrowed",
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseReservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The logged-in user's Reservations, the newest first",
+        "tags" : [ "reservation-controller" ]
+      }
+    },
+    "/api/v1/reservations/{id}/cancel" : {
+      "post" : {
+        "operationId" : "cancel",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Cancels one of the logged-in user's reserved Reservations",
+        "tags" : [ "reservation-controller" ]
+      }
+    },
+    "/api/v1/reservations/{id}/hand-over" : {
+      "post" : {
+        "operationId" : "handOver",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Records that the reserved copy was handed to its user; admins only",
+        "tags" : [ "reservation-controller" ]
+      }
+    },
+    "/api/v1/reservations/{id}/return" : {
+      "post" : {
+        "operationId" : "takeBack",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ReservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Records that the borrowed copy is back in the library; admins only",
+        "tags" : [ "reservation-controller" ]
+      }
+    },
     "/api/v1/reviews/{id}" : {
       "delete" : {
         "operationId" : "delete",
@@ -627,6 +921,45 @@
         },
         "summary" : "Deletes anyone's Review; admins only",
         "tags" : [ "review-controller" ]
+      }
+    },
+    "/api/v1/waitlist/mine" : {
+      "get" : {
+        "operationId" : "mine",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseWaitlistEntryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The waitlists the logged-in user is on, with their place in line or their Offer",
+        "tags" : [ "waitlist-controller" ]
       }
     }
   },
@@ -694,6 +1027,12 @@
               "name" : "English"
             }
           },
+          "max_loan_days" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Max Loan Days: a reservation's return date can be at most this many days after today",
+            "example" : 14
+          },
           "owner" : {
             "description" : "The teacher who owns the book; null for a University Book",
             "example" : {
@@ -741,6 +1080,24 @@
             "type" : "integer",
             "format" : "int32",
             "example" : 6
+          }
+        }
+      },
+      "BookRefResponse" : {
+        "type" : "object",
+        "properties" : {
+          "cover_image_url" : {
+            "type" : "string",
+            "example" : "https://covers.openlibrary.org/b/id/8430006-L.jpg"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 1
+          },
+          "title" : {
+            "type" : "string",
+            "example" : "Clean Code"
           }
         }
       },
@@ -862,6 +1219,20 @@
           }
         }
       },
+      "PageResponseReservationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ReservationResponse"
+            }
+          },
+          "page" : {
+            "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
+      },
       "PageResponseReviewResponse" : {
         "type" : "object",
         "properties" : {
@@ -869,6 +1240,20 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/ReviewResponse"
+            }
+          },
+          "page" : {
+            "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "PageResponseWaitlistEntryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/WaitlistEntryResponse"
             }
           },
           "page" : {
@@ -919,6 +1304,75 @@
           }
         },
         "required" : [ "email" ]
+      },
+      "ReservationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "book" : {
+            "$ref" : "#/components/schemas/BookRefResponse"
+          },
+          "borrowed_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-16T09:30:00Z"
+          },
+          "finished_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "When it was returned, cancelled or expired",
+            "example" : "2026-11-25T12:00:00Z"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 17
+          },
+          "overdue" : {
+            "type" : "boolean",
+            "description" : "Borrowed and past its return deadline",
+            "example" : false
+          },
+          "pickup_deadline" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "When an uncollected copy goes back on the shelf; set only while reserved",
+            "example" : "2026-11-17T10:00:00Z"
+          },
+          "reserved_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-15T10:00:00Z"
+          },
+          "return_deadline" : {
+            "type" : "string",
+            "format" : "date",
+            "example" : "2026-11-29"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "reserved → borrowed → returned; a reserved one can also become cancelled or expired",
+            "enum" : [ "reserved", "borrowed", "returned", "cancelled", "expired" ],
+            "example" : "reserved"
+          },
+          "user" : {
+            "$ref" : "#/components/schemas/NamedItemResponse",
+            "example" : {
+              "id" : 2,
+              "name" : "Hakob Karapetyan"
+            }
+          }
+        }
+      },
+      "ReserveRequest" : {
+        "type" : "object",
+        "properties" : {
+          "return_deadline" : {
+            "type" : "string",
+            "format" : "date",
+            "description" : "After today and at most the book's max_loan_days from today",
+            "example" : "2026-11-29"
+          }
+        }
       },
       "ReviewRequest" : {
         "type" : "object",
@@ -1076,6 +1530,31 @@
           }
         },
         "required" : [ "email" ]
+      },
+      "WaitlistEntryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "added_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-15T10:00:00Z"
+          },
+          "book" : {
+            "$ref" : "#/components/schemas/BookRefResponse"
+          },
+          "offer_expires_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "Set while a copy is held for the user: reserve the book before this time, or it goes to the next in line",
+            "example" : "2026-11-16T10:00:00Z"
+          },
+          "position" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32",
+            "description" : "Place in line, 1 being next; null while the user holds an Offer",
+            "example" : 2
+          }
+        }
       }
     },
     "securitySchemes" : {

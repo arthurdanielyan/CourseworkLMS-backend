@@ -187,9 +187,12 @@ class SecurityRulesTest : IntegrationTest() {
                 """,
             ).query(Int::class.java).single()
             val before = jdbc.copiesAvailable(book)
-            jdbc.sql("insert into reservations (user_id, book_id, return_deadline) values (3, :book, current_date + 14)")
-                .param("book", book)
-                .update()
+            jdbc.sql(
+                """
+                insert into reservations (user_id, book_id, return_deadline)
+                values (3, :book, (now() at time zone 'Asia/Yerevan')::date + 1)
+                """,
+            ).param("book", book).update()
             jdbc.sql("insert into book_reviews (user_id, book_id, stars) values (3, :book, 5)")
                 .param("book", book)
                 .update()

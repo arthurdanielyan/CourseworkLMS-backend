@@ -43,6 +43,7 @@ data class BookDetails(
     val pdfUrl: String?,
     val totalCopies: Int,
     val copiesAvailable: Int,
+    val maxLoanDays: Int,
     val rating: Float?,
     val owner: NamedItem?,
     val favourite: Boolean,

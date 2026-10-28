@@ -8,24 +8,32 @@ object SeedUsers {
     val admin = CurrentUser(
         id = 1,
         role = "admin",
-        permissions = setOf("books.view", "books.add", "books.delete", "books.edit", "users.manage", "reviews.moderate"),
+        permissions = setOf(
+            "books.view",
+            "books.add",
+            "books.delete",
+            "books.edit",
+            "users.manage",
+            "reviews.moderate",
+            "reservations.manage",
+        ),
     )
 
     val student = CurrentUser(
         id = 2,
         role = "student",
-        permissions = setOf("books.view"),
+        permissions = setOf("books.view", "reservations.create"),
     )
 
     val otherStudent = CurrentUser(
         id = 3,
         role = "student",
-        permissions = setOf("books.view"),
+        permissions = setOf("books.view", "reservations.create"),
     )
 
     val teacher = CurrentUser(
         id = 4,
         role = "teacher",
-        permissions = setOf("books.view", "books.add", "books.delete.own", "books.edit.own"),
+        permissions = setOf("books.view", "books.add", "books.delete.own", "books.edit.own", "reservations.create"),
     )
 }

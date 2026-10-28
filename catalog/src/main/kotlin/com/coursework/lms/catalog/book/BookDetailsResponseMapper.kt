@@ -24,6 +24,7 @@ class BookDetailsResponseMapper(
             pdfUrl = from.pdfUrl,
             totalCopies = from.totalCopies,
             copiesAvailable = from.copiesAvailable,
+            maxLoanDays = from.maxLoanDays,
             available = from.available,
             rating = roundRating(from.rating),
             owner = from.owner?.let(namedItemResponseMapper::map),
