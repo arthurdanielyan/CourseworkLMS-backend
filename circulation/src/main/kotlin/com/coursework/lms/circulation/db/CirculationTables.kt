@@ -25,7 +25,7 @@ object ReservationsTable : Table("reservations") {
     val userId = integer("user_id")
         .references(UsersTable.id, onDelete = NO_ACTION, onUpdate = CASCADE, fkName = "user_id")
     val bookId = integer("book_id")
-        .references(BooksTable.id, onDelete = NO_ACTION, onUpdate = CASCADE, fkName = "book_id")
+        .references(BooksTable.id, onDelete = CASCADE, onUpdate = CASCADE, fkName = "book_id")
     val createdAt = timestampWithTimeZone("created_at").defaultExpression(now)
     val returnDeadline = date("return_deadline")
     val status = varchar("status", 20)

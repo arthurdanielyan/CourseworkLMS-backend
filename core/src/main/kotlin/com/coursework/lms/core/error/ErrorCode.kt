@@ -13,5 +13,6 @@ object ErrorCode {
     const val NOT_FOUND = "not_found"
     const val METHOD_NOT_ALLOWED = "method_not_allowed"
     const val CONFLICT = "conflict"
+    const val FILE_TOO_LARGE = "file_too_large"
     const val INTERNAL_ERROR = "internal_error"
 }

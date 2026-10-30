@@ -3,6 +3,7 @@ package com.coursework.lms.catalog.lookup
 import com.coursework.lms.catalog.NamedItemResponse
 import com.coursework.lms.catalog.NamedItemResponseMapper
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 // Not paged: the app shows every value as a filter chip.
@@ -69,5 +71,29 @@ class CatalogLookupController(
     )
     fun owners(): List<NamedItemResponse> {
         return catalogLookupService.owners().map(namedItemResponseMapper::map)
+    }
+
+    @GetMapping("/authors")
+    @Operation(summary = "Authors whose name contains the text, sorted by name, for autocomplete")
+    fun authors(
+        @Parameter(example = "martin")
+        @RequestParam
+        q: String,
+        @RequestParam(defaultValue = "10")
+        limit: Int,
+    ): List<NamedItemResponse> {
+        return catalogLookupService.authors(q.trim(), limit.coerceIn(1, 50)).map(namedItemResponseMapper::map)
+    }
+
+    @GetMapping("/publishers")
+    @Operation(summary = "Publishers whose name contains the text, sorted by name, for autocomplete")
+    fun publishers(
+        @Parameter(example = "pear")
+        @RequestParam
+        q: String,
+        @RequestParam(defaultValue = "10")
+        limit: Int,
+    ): List<NamedItemResponse> {
+        return catalogLookupService.publishers(q.trim(), limit.coerceIn(1, 50)).map(namedItemResponseMapper::map)
     }
 }

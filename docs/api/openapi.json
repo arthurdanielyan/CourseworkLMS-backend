@@ -153,6 +153,46 @@
         "tags" : [ "registration-controller" ]
       }
     },
+    "/api/v1/authors" : {
+      "get" : {
+        "operationId" : "authors",
+        "parameters" : [ {
+          "example" : "martin",
+          "in" : "query",
+          "name" : "q",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/NamedItemResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Authors whose name contains the text, sorted by name, for autocomplete",
+        "tags" : [ "catalog-lookup-controller" ]
+      }
+    },
     "/api/v1/books" : {
       "get" : {
         "operationId" : "search",
@@ -269,6 +309,72 @@
           }
         },
         "tags" : [ "book-controller" ]
+      },
+      "post" : {
+        "operationId" : "create",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BookRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BookDetailsResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Adds a book: a University Book when an admin adds it, otherwise the teacher's own",
+        "tags" : [ "book-editing-controller" ]
+      }
+    },
+    "/api/v1/books/mine" : {
+      "get" : {
+        "operationId" : "mine_2",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseBookSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The books the logged-in teacher owns, sorted by title",
+        "tags" : [ "book-editing-controller" ]
       }
     },
     "/api/v1/books/owners" : {
@@ -527,6 +633,25 @@
       }
     },
     "/api/v1/books/{id}" : {
+      "delete" : {
+        "operationId" : "delete",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Deletes a book; teachers delete their own while the library holds no copies. A book with borrowed copies is hidden until they are returned.",
+        "tags" : [ "book-editing-controller" ]
+      },
       "get" : {
         "operationId" : "details",
         "parameters" : [ {
@@ -551,6 +676,182 @@
           }
         },
         "tags" : [ "book-controller" ]
+      },
+      "put" : {
+        "operationId" : "update",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BookRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BookDetailsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Replaces a book's details; teachers edit only their own books",
+        "tags" : [ "book-editing-controller" ]
+      }
+    },
+    "/api/v1/books/{id}/cover" : {
+      "delete" : {
+        "operationId" : "detachCover",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BookDetailsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Removes the book's cover",
+        "tags" : [ "book-editing-controller" ]
+      },
+      "put" : {
+        "operationId" : "attachCover",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BookDetailsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Uploads the book's cover: JPEG, PNG or WebP, up to 5 MB",
+        "tags" : [ "book-editing-controller" ]
+      }
+    },
+    "/api/v1/books/{id}/pdf" : {
+      "delete" : {
+        "operationId" : "detachPdf",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BookDetailsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Removes the book's PDF",
+        "tags" : [ "book-editing-controller" ]
+      },
+      "put" : {
+        "operationId" : "attachPdf",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BookDetailsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Uploads the book's PDF, up to 50 MB",
+        "tags" : [ "book-editing-controller" ]
       }
     },
     "/api/v1/categories" : {
@@ -661,6 +962,36 @@
         "tags" : [ "favourite-controller" ]
       }
     },
+    "/api/v1/files/{id}" : {
+      "get" : {
+        "operationId" : "download",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "A book's cover or PDF; needs no token. Links come from the book's cover_image_url and pdf_url.",
+        "tags" : [ "file-controller" ]
+      }
+    },
     "/api/v1/languages" : {
       "get" : {
         "operationId" : "languages",
@@ -690,6 +1021,46 @@
           }
         },
         "summary" : "Every book language, sorted by name",
+        "tags" : [ "catalog-lookup-controller" ]
+      }
+    },
+    "/api/v1/publishers" : {
+      "get" : {
+        "operationId" : "publishers",
+        "parameters" : [ {
+          "example" : "pear",
+          "in" : "query",
+          "name" : "q",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "limit",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/NamedItemResponse"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Publishers whose name contains the text, sorted by name, for autocomplete",
         "tags" : [ "catalog-lookup-controller" ]
       }
     },
@@ -904,7 +1275,7 @@
     },
     "/api/v1/reviews/{id}" : {
       "delete" : {
-        "operationId" : "delete",
+        "operationId" : "delete_1",
         "parameters" : [ {
           "in" : "path",
           "name" : "id",
@@ -1100,6 +1471,88 @@
             "example" : "Clean Code"
           }
         }
+      },
+      "BookRequest" : {
+        "type" : "object",
+        "properties" : {
+          "authors" : {
+            "type" : "array",
+            "description" : "Names; a name the library doesn't know yet is added",
+            "items" : {
+              "type" : "string",
+              "example" : "Robert C. Martin"
+            },
+            "maxItems" : 10,
+            "minItems" : 1
+          },
+          "category_ids" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer",
+              "format" : "int32",
+              "example" : 2
+            }
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "Practical advice on writing readable, maintainable code.",
+            "minLength" : 1
+          },
+          "edition" : {
+            "type" : [ "string", "null" ],
+            "example" : "1st edition",
+            "maxLength" : 50,
+            "minLength" : 0
+          },
+          "language_id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 1
+          },
+          "max_loan_days" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Admins only; leave it out to keep the current length",
+            "example" : 14,
+            "maximum" : 365,
+            "minimum" : 1
+          },
+          "publication_year" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 2008,
+            "maximum" : 2100,
+            "minimum" : 1000
+          },
+          "publisher" : {
+            "type" : "string",
+            "description" : "A name; one the library doesn't know yet is added",
+            "example" : "Pearson",
+            "maxLength" : 50,
+            "minLength" : 0
+          },
+          "subtitle" : {
+            "type" : [ "string", "null" ],
+            "example" : "A Handbook of Agile Software Craftsmanship",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "title" : {
+            "type" : "string",
+            "example" : "Clean Code",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "total_copies" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Admins only; leave it out to keep the current number",
+            "example" : 6,
+            "maximum" : 10000,
+            "minimum" : 0
+          }
+        },
+        "required" : [ "description", "publisher", "title" ]
       },
       "BookSummaryResponse" : {
         "type" : "object",

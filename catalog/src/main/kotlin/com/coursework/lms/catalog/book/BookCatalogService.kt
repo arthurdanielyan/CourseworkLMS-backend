@@ -1,6 +1,7 @@
 package com.coursework.lms.catalog.book
 
 import com.coursework.lms.catalog.NamedItem
+import com.coursework.lms.catalog.containing
 import com.coursework.lms.catalog.db.AuthorsTable
 import com.coursework.lms.catalog.db.BookAuthorsTable
 import com.coursework.lms.catalog.db.BookLanguagesTable
@@ -8,6 +9,7 @@ import com.coursework.lms.catalog.db.BooksCategoriesTable
 import com.coursework.lms.catalog.db.BooksTable
 import com.coursework.lms.catalog.db.CategoriesTable
 import com.coursework.lms.catalog.db.PublishersTable
+import com.coursework.lms.catalog.file.StoredFiles
 import com.coursework.lms.core.error.ApiException
 import com.coursework.lms.core.error.ErrorCode
 import com.coursework.lms.core.paging.PageQuery
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class BookCatalogService(
     private val favouriteBooks: FavouriteBooks,
+    private val storedFiles: StoredFiles,
 ) {
 
     @Transactional(readOnly = true)
@@ -66,7 +69,7 @@ class BookCatalogService(
             return emptyList()
         }
         val rows = summaryQuery()
-            .where { BooksTable.id inList bookIds }
+            .where { (BooksTable.id inList bookIds) and BooksTable.deletedAt.isNull() }
             .associateBy { it[BooksTable.id] }
         return summariesOf(bookIds.mapNotNull { rows[it] }, userId)
     }
@@ -88,7 +91,7 @@ class BookCatalogService(
                     UsersTable.username,
                 ),
             )
-            .where { BooksTable.id eq bookId }
+            .where { (BooksTable.id eq bookId) and BooksTable.deletedAt.isNull() }
             .singleOrNull()
             ?: throw ApiException(
                 status = HttpStatus.NOT_FOUND,
@@ -107,8 +110,8 @@ class BookCatalogService(
             categories = categoriesOf(bookId),
             publicationYear = row[BooksTable.publicationYear],
             edition = row[BooksTable.edition],
-            coverImageUrl = row[BooksTable.coverImageUrl],
-            pdfUrl = row[BooksTable.pdfUrl],
+            coverImageUrl = coverUrlOf(row),
+            pdfUrl = pdfUrlOf(row),
             totalCopies = row[BooksTable.totalCopies],
             copiesAvailable = row[BooksTable.copiesAvailable],
             maxLoanDays = row[BooksTable.maxLoanDays],
@@ -118,10 +121,13 @@ class BookCatalogService(
         )
     }
 
-    /** Throws a `not_found` problem when there is no book with [bookId]. */
+    /** Throws a `not_found` problem when there is no book with [bookId], or it is a Hidden Book. */
     @Transactional(readOnly = true)
     fun requireBook(bookId: Int) {
-        val exists = BooksTable.select(BooksTable.id).where { BooksTable.id eq bookId }.any()
+        val exists = BooksTable
+            .select(BooksTable.id)
+            .where { (BooksTable.id eq bookId) and BooksTable.deletedAt.isNull() }
+            .any()
         if (!exists) {
             throw ApiException(
                 status = HttpStatus.NOT_FOUND,
@@ -139,11 +145,22 @@ class BookCatalogService(
                 BooksTable.title,
                 BooksTable.subtitle,
                 BooksTable.coverImageUrl,
+                BooksTable.coverFileId,
                 BooksTable.pdfUrl,
+                BooksTable.pdfFileId,
                 BooksTable.rating,
                 BooksTable.copiesAvailable,
                 PublishersTable.name,
             )
+    }
+
+    // An uploaded file wins over the link to another site that books from before uploads carry.
+    private fun coverUrlOf(row: ResultRow): String? {
+        return row[BooksTable.coverFileId]?.let(storedFiles::urlOf) ?: row[BooksTable.coverImageUrl]
+    }
+
+    private fun pdfUrlOf(row: ResultRow): String? {
+        return row[BooksTable.pdfFileId]?.let(storedFiles::urlOf) ?: row[BooksTable.pdfUrl]
     }
 
     private fun summariesOf(
@@ -160,8 +177,8 @@ class BookCatalogService(
                 subtitle = row[BooksTable.subtitle],
                 authors = authors[row[BooksTable.id]].orEmpty().map { it.name },
                 publisher = row[PublishersTable.name],
-                coverImageUrl = row[BooksTable.coverImageUrl],
-                hasPdf = row[BooksTable.pdfUrl] != null,
+                coverImageUrl = coverUrlOf(row),
+                hasPdf = pdfUrlOf(row) != null,
                 rating = row[BooksTable.rating],
                 available = row[BooksTable.copiesAvailable] > 0,
                 favourite = row[BooksTable.id] in favourites,
@@ -171,6 +188,7 @@ class BookCatalogService(
 
     private fun matching(search: BookSearch): Op<Boolean> {
         val criteria = buildList {
+            add(BooksTable.deletedAt.isNull())
             search.text?.let { text ->
                 val pattern = containing(text)
                 add(
@@ -192,7 +210,7 @@ class BookCatalogService(
             }
             ownedBy(search)?.let { add(it) }
         }
-        return if (criteria.isEmpty()) Op.TRUE else criteria.compoundAnd()
+        return criteria.compoundAnd()
     }
 
     private fun ownedBy(search: BookSearch): Op<Boolean>? {
@@ -222,12 +240,6 @@ class BookCatalogService(
                         (BooksCategoriesTable.categoryId inList categoryIds)
                 },
         )
-    }
-
-    // Escaped, so a % or _ the user types isn't a wildcard.
-    private fun containing(text: String): LikePattern {
-        val literal = LikePattern.ofLiteral(text.lowercase())
-        return LikePattern("%${literal.pattern}%", literal.escapeChar)
     }
 
     private fun authorsOf(bookIds: List<Int>): Map<Int, List<NamedItem>> {

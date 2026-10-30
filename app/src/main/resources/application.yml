@@ -16,6 +16,11 @@ spring:
     # A database that already holds the schema without Flyway history counts as V1.
     baseline-on-migrate: true
     baseline-version: 1
+  servlet:
+    multipart:
+      # The largest upload is a book's PDF; covers have a smaller limit of their own.
+      max-file-size: 50MB
+      max-request-size: 51MB
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT:587}

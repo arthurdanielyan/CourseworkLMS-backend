@@ -119,6 +119,7 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
             error is NoResourceFoundException -> ErrorCode.NOT_FOUND
             error is HttpRequestMethodNotSupportedException -> ErrorCode.METHOD_NOT_ALLOWED
             status.value() == HttpStatus.NOT_FOUND.value() -> ErrorCode.NOT_FOUND
+            status.value() == HttpStatus.PAYLOAD_TOO_LARGE.value() -> ErrorCode.FILE_TOO_LARGE
             status.is4xxClientError -> ErrorCode.BAD_REQUEST
             else -> ErrorCode.INTERNAL_ERROR
         }

@@ -1,11 +1,19 @@
 package com.coursework.lms.catalog.db
 
 import com.coursework.lms.identity.db.UsersTable
+import org.jetbrains.exposed.v1.core.CustomFunction
 import org.jetbrains.exposed.v1.core.ReferenceOption.CASCADE
 import org.jetbrains.exposed.v1.core.ReferenceOption.NO_ACTION
 import org.jetbrains.exposed.v1.core.ReferenceOption.SET_NULL
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.java.javaUUID
+import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.javatime.JavaOffsetDateTimeColumnType
+import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
+import java.time.OffsetDateTime
+
+private val now = CustomFunction<OffsetDateTime>("now", JavaOffsetDateTimeColumnType())
 
 object PublishersTable : Table("publishers") {
 
@@ -13,6 +21,10 @@ object PublishersTable : Table("publishers") {
     val name = varchar("name", 50)
 
     override val primaryKey = PrimaryKey(id, name = "publishers_pk")
+
+    init {
+        uniqueIndex("publishers_name_lower_key", functions = listOf(name.lowerCase()))
+    }
 }
 
 object BookLanguagesTable : Table("book_languages") {
@@ -29,6 +41,10 @@ object AuthorsTable : Table("authors") {
     val name = varchar("name", 50)
 
     override val primaryKey = PrimaryKey(id, name = "authors_pk")
+
+    init {
+        uniqueIndex("authors_name_lower_key", functions = listOf(name.lowerCase()))
+    }
 }
 
 object CategoriesTable : Table("categories") {
@@ -37,6 +53,17 @@ object CategoriesTable : Table("categories") {
     val name = varchar("name", 50)
 
     override val primaryKey = PrimaryKey(id, name = "categories_pk")
+}
+
+object FilesTable : Table("files") {
+
+    val id = javaUUID("id")
+    val contentType = varchar("content_type", 100)
+    val sizeBytes = integer("size_bytes")
+    val data = binary("data")
+    val createdAt = timestampWithTimeZone("created_at").defaultExpression(now)
+
+    override val primaryKey = PrimaryKey(id, name = "files_pkey")
 }
 
 object BooksTable : Table("books") {
@@ -64,6 +91,15 @@ object BooksTable : Table("books") {
     val maxLoanDays = integer("max_reservation_days")
         .default(14)
         .check("books_max_reservation_days_check") { it greaterEq 1 }
+    val coverFileId = javaUUID("cover_file_id")
+        .references(FilesTable.id, onDelete = SET_NULL, onUpdate = NO_ACTION, fkName = "books_cover_file_id_fkey")
+        .nullable()
+    val pdfFileId = javaUUID("pdf_file_id")
+        .references(FilesTable.id, onDelete = SET_NULL, onUpdate = NO_ACTION, fkName = "books_pdf_file_id_fkey")
+        .nullable()
+
+    /** Set while the book is a Hidden Book. */
+    val deletedAt = timestampWithTimeZone("deleted_at").nullable()
 
     override val primaryKey = PrimaryKey(id, name = "books_pk")
 }
@@ -81,7 +117,7 @@ object BookAuthorsTable : Table("book_authors") {
 object BooksCategoriesTable : Table("books_categories") {
 
     val bookId = integer("book_id")
-        .references(BooksTable.id, onDelete = NO_ACTION, onUpdate = CASCADE, fkName = "fk_book")
+        .references(BooksTable.id, onDelete = CASCADE, onUpdate = CASCADE, fkName = "fk_book")
     val categoryId = integer("category_id")
         .references(CategoriesTable.id, onDelete = NO_ACTION, onUpdate = CASCADE, fkName = "fk_category")
 

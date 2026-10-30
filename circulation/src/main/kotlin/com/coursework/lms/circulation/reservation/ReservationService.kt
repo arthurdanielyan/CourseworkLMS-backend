@@ -1,7 +1,9 @@
 package com.coursework.lms.circulation.reservation
 
 import com.coursework.lms.catalog.NamedItem
+import com.coursework.lms.catalog.book.BookEditingService
 import com.coursework.lms.catalog.db.BooksTable
+import com.coursework.lms.catalog.file.StoredFiles
 import com.coursework.lms.circulation.CirculationErrorCode
 import com.coursework.lms.circulation.CirculationProperties
 import com.coursework.lms.circulation.LIBRARY_ZONE
@@ -23,6 +25,7 @@ import org.jetbrains.exposed.v1.core.compoundAnd
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.jdbc.Query
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -39,6 +42,8 @@ import java.time.OffsetDateTime
 class ReservationService(
     private val clock: Clock,
     private val properties: CirculationProperties,
+    private val storedFiles: StoredFiles,
+    private val bookEditingService: BookEditingService,
 ) {
 
     @Transactional
@@ -50,7 +55,7 @@ class ReservationService(
         // Locks the book, so two people can't both take its last copy.
         val book = BooksTable
             .select(BooksTable.copiesAvailable, BooksTable.maxLoanDays)
-            .where { BooksTable.id eq bookId }
+            .where { (BooksTable.id eq bookId) and BooksTable.deletedAt.isNull() }
             .forUpdate()
             .singleOrNull()
             ?: throw notFound("There is no book with id $bookId.")
@@ -132,7 +137,9 @@ class ReservationService(
     /** Marks a Borrowed copy as back in the library. */
     @Transactional
     fun takeBack(reservationId: Int): Reservation {
-        return move(find(reservationId), from = ReservationStatus.BORROWED, to = ReservationStatus.RETURNED)
+        val reservation = move(find(reservationId), from = ReservationStatus.BORROWED, to = ReservationStatus.RETURNED)
+        bookEditingService.removeHiddenIfReturned(reservation.book.id)
+        return reservation
     }
 
     /** The Reserved Reservations whose Pickup Window has passed, as their ids and their users' ids. */
@@ -227,7 +234,10 @@ class ReservationService(
         return ReservationsTable
             .join(BooksTable, JoinType.INNER, ReservationsTable.bookId, BooksTable.id)
             .join(UsersTable, JoinType.INNER, ReservationsTable.userId, UsersTable.id)
-            .select(ReservationsTable.columns + listOf(BooksTable.title, BooksTable.coverImageUrl, UsersTable.username))
+            .select(
+                ReservationsTable.columns +
+                    listOf(BooksTable.title, BooksTable.coverImageUrl, BooksTable.coverFileId, UsersTable.username),
+            )
     }
 
     private fun toReservation(
@@ -241,7 +251,7 @@ class ReservationService(
             book = BookRef(
                 id = row[ReservationsTable.bookId],
                 title = row[BooksTable.title],
-                coverImageUrl = row[BooksTable.coverImageUrl],
+                coverImageUrl = row[BooksTable.coverFileId]?.let(storedFiles::urlOf) ?: row[BooksTable.coverImageUrl],
             ),
             user = NamedItem(row[ReservationsTable.userId], row[UsersTable.username]),
             status = status,

@@ -1,6 +1,7 @@
 package com.coursework.lms.circulation.waitlist
 
 import com.coursework.lms.catalog.db.BooksTable
+import com.coursework.lms.catalog.file.StoredFiles
 import com.coursework.lms.circulation.CirculationErrorCode
 import com.coursework.lms.circulation.db.WaitlistTable
 import com.coursework.lms.circulation.db.hasActiveReservation
@@ -31,6 +32,7 @@ import java.time.OffsetDateTime
 @Service
 class WaitlistService(
     private val clock: Clock,
+    private val storedFiles: StoredFiles,
 ) {
 
     @Transactional
@@ -40,7 +42,7 @@ class WaitlistService(
     ): WaitlistEntry {
         val book = BooksTable
             .select(BooksTable.copiesAvailable)
-            .where { BooksTable.id eq bookId }
+            .where { (BooksTable.id eq bookId) and BooksTable.deletedAt.isNull() }
             .forUpdate()
             .singleOrNull()
             ?: throw ApiException(
@@ -128,7 +130,7 @@ class WaitlistService(
     private fun entryQuery(): Query {
         return WaitlistTable
             .join(BooksTable, JoinType.INNER, WaitlistTable.bookId, BooksTable.id)
-            .select(WaitlistTable.columns + listOf(BooksTable.title, BooksTable.coverImageUrl))
+            .select(WaitlistTable.columns + listOf(BooksTable.title, BooksTable.coverImageUrl, BooksTable.coverFileId))
     }
 
     private fun toEntry(row: ResultRow): WaitlistEntry {
@@ -137,7 +139,7 @@ class WaitlistService(
             book = BookRef(
                 id = row[WaitlistTable.bookId],
                 title = row[BooksTable.title],
-                coverImageUrl = row[BooksTable.coverImageUrl],
+                coverImageUrl = row[BooksTable.coverFileId]?.let(storedFiles::urlOf) ?: row[BooksTable.coverImageUrl],
             ),
             addedAt = row[WaitlistTable.addedAt],
             position = if (offerExpiresAt == null) positionOf(row) else null,
