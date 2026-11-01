@@ -71,4 +71,32 @@ class ApiContractTest : IntegrationTest() {
             jsonPath("$.display_name") { value("Artur") }
         }
     }
+
+    @Test
+    fun `the API docs name fields the way the client sends them`() {
+        mockMvc.get("/v3/api-docs").andExpect {
+            status { isOk() }
+            jsonPath("$.components.schemas.StartRegistrationRequest.properties.full_name") { exists() }
+            jsonPath("$.components.schemas.TokenPairResponse.properties.access_token") { exists() }
+            jsonPath("$.components.schemas.TokenPairResponse.properties.accessToken") { doesNotExist() }
+        }
+    }
+
+    @Test
+    fun `the API docs show realistic examples of JSON responses`() {
+        mockMvc.get("/v3/api-docs").andExpect {
+            jsonPath("$.components.schemas.StartRegistrationRequest.properties.email.example") {
+                value("anna.petrosyan@polytechnic.am")
+            }
+            jsonPath("$.paths['/api/v1/auth/login'].post.responses['200'].content['application/json']") { exists() }
+        }
+    }
+
+    @Test
+    fun `the API docs mark only protected endpoints as needing a token`() {
+        mockMvc.get("/v3/api-docs").andExpect {
+            jsonPath("$.paths['/api/v1/auth/login'].post.security") { isEmpty() }
+            jsonPath("$.paths['/api/v1/test-probe/me'].get.security") { doesNotExist() }
+        }
+    }
 }

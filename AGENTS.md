@@ -48,6 +48,7 @@ A capability module depends on `:core` and, when it must, on another capability 
 - One constructor parameter per line, trailing comma, closing paren on its own line, blank line before the first member.
 - Functions have an explicit return type and a block body with `return` — no expression bodies for public functions.
 - Mapping between layers goes through one mapper per direction, named for its endpoints (`BookRowMapper`, `BookResponseMapper`).
+- Request and response fields carry `@field:Schema(example = "…")` with a realistic value, so the API docs show bodies a client can send as-is.
 - A Bean Validation constraint we define ourselves (`@PolytechnicEmail`, `@StrongPassword`) is applied as `@field:…` on a constructor property — without the use-site target Kotlin puts it where the validator never looks. Jakarta's own constraints work without it.
 - Dependencies use version-catalog accessors (`libs.…`) and type-safe project accessors (`projects.core`); never a hardcoded version in a module's build file.
 
