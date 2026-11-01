@@ -1,8 +1,13 @@
 lms:
   jwt:
     secret: test-secret-that-is-at-least-thirty-two-bytes-long
+  mail:
+    from: no-reply@lms.test
 
 spring:
+  # Never contacted: tests record emails instead of sending them.
+  mail:
+    host: localhost
   datasource:
     hikari:
       # One connection, so consecutive transactions are guaranteed to reuse it.

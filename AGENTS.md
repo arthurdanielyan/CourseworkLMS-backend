@@ -33,7 +33,7 @@ A capability module depends on `:core` and, when it must, on another capability 
 
 - Paths start with `/api/v1`. JSON is snake_case everywhere, set globally — no per-field naming annotations.
 - Lists are paged: `?page=0&size=20` (zero-based, max 100) in, `PageResponse` out (`content` + `page {size, number, total_elements, total_pages}`). Bind `PageQuery` with `@Valid @ModelAttribute`; build the response with `Query.toPage(...)`.
-- Failures are RFC 9457 problem responses with a `code` from `ErrorCode`. A feature reports its own with `ApiException(status, code, detail)`; never build an error body by hand.
+- Failures are RFC 9457 problem responses with a `code`. Codes any module may answer with are in `:core`'s `ErrorCode`; a code only one feature answers with lives in that feature's module (e.g. `IdentityErrorCode`). Report failures with `ApiException(status, code, detail)`; never build an error body by hand.
 - **401 means only "your access token is missing, expired or invalid"** — the client refreshes its token on every 401. "Authenticated but not allowed" is 403.
 - Paths that need no token are declared by a `PublicEndpoints` bean in the module that owns them; everything else requires authentication.
 
@@ -48,6 +48,7 @@ A capability module depends on `:core` and, when it must, on another capability 
 - One constructor parameter per line, trailing comma, closing paren on its own line, blank line before the first member.
 - Functions have an explicit return type and a block body with `return` — no expression bodies for public functions.
 - Mapping between layers goes through one mapper per direction, named for its endpoints (`BookRowMapper`, `BookResponseMapper`).
+- A Bean Validation constraint we define ourselves (`@PolytechnicEmail`, `@StrongPassword`) is applied as `@field:…` on a constructor property — without the use-site target Kotlin puts it where the validator never looks. Jakarta's own constraints work without it.
 - Dependencies use version-catalog accessors (`libs.…`) and type-safe project accessors (`projects.core`); never a hardcoded version in a module's build file.
 
 ### Tests

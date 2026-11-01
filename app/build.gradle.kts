@@ -14,6 +14,7 @@ kotlin {
 dependencies {
     implementation(platform(libs.spring.boot.dependencies))
     implementation(projects.core)
+    implementation(projects.identity)
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.spring.boot.starter.flyway)
     implementation(libs.flyway.database.postgresql)

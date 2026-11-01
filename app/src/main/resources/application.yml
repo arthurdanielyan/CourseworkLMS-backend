@@ -16,12 +16,22 @@ spring:
     # A database that already holds the schema without Flyway history counts as V1.
     baseline-on-migrate: true
     baseline-version: 1
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:true}
 
 lms:
   jwt:
     secret: ${JWT_SECRET}
     issuer: lms
     access-token-ttl: 15m
+  mail:
+    from: ${MAIL_FROM}
 
 springdoc:
   swagger-ui:
@@ -35,3 +45,7 @@ management:
   endpoint:
     health:
       show-details: never
+  health:
+    # A mail server outage delays emails; it does not make the backend unable to serve requests.
+    mail:
+      enabled: false

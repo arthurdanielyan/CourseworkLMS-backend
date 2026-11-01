@@ -5,6 +5,7 @@ import com.coursework.lms.core.paging.PageResponse
 import com.coursework.lms.core.paging.toPage
 import com.coursework.lms.core.security.CurrentUser
 import com.coursework.lms.core.security.PublicEndpoints
+import com.coursework.lms.identity.db.RolesTable
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import org.jetbrains.exposed.v1.core.SortOrder
@@ -33,7 +34,7 @@ class ProbeController(
 
     @GetMapping("/me")
     fun me(@AuthenticationPrincipal user: CurrentUser): Map<String, Any?> {
-        return mapOf("user_id" to user.id, "db_user_id" to probe.dbUserId())
+        return mapOf("user_id" to user.id, "role" to user.role, "db_user_id" to probe.dbUserId())
     }
 
     @GetMapping("/public/db-user")
