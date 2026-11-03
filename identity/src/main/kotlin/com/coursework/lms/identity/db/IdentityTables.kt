@@ -69,6 +69,19 @@ object PendingRegistrationsTable : Table("pending_registrations") {
     override val primaryKey = PrimaryKey(email, name = "pending_registrations_pkey")
 }
 
+object PasswordResetsTable : Table("password_resets") {
+
+    val userId = integer("user_id")
+        .references(UsersTable.id, onDelete = CASCADE, onUpdate = NO_ACTION, fkName = "password_resets_user_id_fkey")
+    val codeHash = text("code_hash")
+    val codeExpiresAt = timestampWithTimeZone("code_expires_at")
+    val failedAttempts = short("failed_attempts").default(0)
+    val lastSentAt = timestampWithTimeZone("last_sent_at")
+    val createdAt = timestampWithTimeZone("created_at").defaultExpression(now)
+
+    override val primaryKey = PrimaryKey(userId, name = "password_resets_pkey")
+}
+
 object RefreshTokensTable : Table("refresh_tokens") {
 
     val id = long("id").autoIncrement()

@@ -1,5 +1,6 @@
 package com.coursework.lms.identity
 
+import com.coursework.lms.identity.db.PasswordResetsTable
 import com.coursework.lms.identity.db.PendingRegistrationsTable
 import com.coursework.lms.identity.db.RefreshTokensTable
 import org.jetbrains.exposed.v1.core.less
@@ -31,6 +32,14 @@ class IdentityCleanupJob(
         val pendingRegistrations = PendingRegistrationsTable.deleteWhere {
             PendingRegistrationsTable.codeExpiresAt less now.minus(properties.pendingRegistrationRetention)
         }
-        log.info("Deleted {} expired refresh tokens and {} stale pending registrations", refreshTokens, pendingRegistrations)
+        val passwordResets = PasswordResetsTable.deleteWhere {
+            PasswordResetsTable.codeExpiresAt less now.minus(properties.pendingRegistrationRetention)
+        }
+        log.info(
+            "Deleted {} expired refresh tokens, {} stale pending registrations and {} stale password resets",
+            refreshTokens,
+            pendingRegistrations,
+            passwordResets,
+        )
     }
 }

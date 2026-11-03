@@ -37,6 +37,82 @@
         "tags" : [ "session-controller" ]
       }
     },
+    "/api/v1/auth/password-resets" : {
+      "post" : {
+        "operationId" : "start_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StartPasswordResetRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "202" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PasswordResetSentResponse"
+                }
+              }
+            },
+            "description" : "Accepted"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Emails a reset code; call it again to resend. An email without an account gets the same answer, but no email.",
+        "tags" : [ "password-reset-controller" ]
+      }
+    },
+    "/api/v1/auth/password-resets/complete" : {
+      "post" : {
+        "operationId" : "complete",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CompletePasswordResetRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Sets the new password and logs the user out on every device; they log in again with it",
+        "tags" : [ "password-reset-controller" ]
+      }
+    },
+    "/api/v1/auth/password-resets/verify" : {
+      "post" : {
+        "operationId" : "verify_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VerifyPasswordResetRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Checks the code without using it up, before the new password is chosen",
+        "tags" : [ "password-reset-controller" ]
+      }
+    },
     "/api/v1/auth/refresh" : {
       "post" : {
         "operationId" : "refresh",
@@ -1607,6 +1683,29 @@
           }
         }
       },
+      "CompletePasswordResetRequest" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "example" : "482913",
+            "pattern" : "^\\d{6}$"
+          },
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "^[^@\\s]+@polytechnic\\.am$"
+          },
+          "new_password" : {
+            "type" : "string",
+            "example" : "Library#2027"
+          }
+        },
+        "required" : [ "email" ]
+      },
       "LoginRequest" : {
         "type" : "object",
         "properties" : {
@@ -1711,6 +1810,25 @@
           },
           "page" : {
             "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "PasswordResetSentResponse" : {
+        "type" : "object",
+        "properties" : {
+          "code_expires_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-16T18:10:00Z"
+          },
+          "email" : {
+            "type" : "string",
+            "example" : "anna.petrosyan@polytechnic.am"
+          },
+          "resend_available_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-16T18:02:00Z"
           }
         }
       },
@@ -1928,6 +2046,20 @@
           }
         }
       },
+      "StartPasswordResetRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "^[^@\\s]+@polytechnic\\.am$"
+          }
+        },
+        "required" : [ "email" ]
+      },
       "StartRegistrationRequest" : {
         "type" : "object",
         "properties" : {
@@ -1966,6 +2098,25 @@
         }
       },
       "VerifyCodeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "example" : "482913",
+            "pattern" : "^\\d{6}$"
+          },
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "^[^@\\s]+@polytechnic\\.am$"
+          }
+        },
+        "required" : [ "email" ]
+      },
+      "VerifyPasswordResetRequest" : {
         "type" : "object",
         "properties" : {
           "code" : {

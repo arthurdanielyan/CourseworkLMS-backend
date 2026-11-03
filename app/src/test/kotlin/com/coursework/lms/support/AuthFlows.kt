@@ -63,6 +63,28 @@ class AuthFlows(
         return post("/api/v1/auth/refresh", mapOf("refresh_token" to refreshToken))
     }
 
+    fun startPasswordReset(email: String): ResultActionsDsl {
+        return post("/api/v1/auth/password-resets", mapOf("email" to email))
+    }
+
+    fun verifyPasswordReset(
+        email: String,
+        code: String,
+    ): ResultActionsDsl {
+        return post("/api/v1/auth/password-resets/verify", mapOf("email" to email, "code" to code))
+    }
+
+    fun completePasswordReset(
+        email: String,
+        code: String,
+        newPassword: String,
+    ): ResultActionsDsl {
+        return post(
+            "/api/v1/auth/password-resets/complete",
+            mapOf("email" to email, "code" to code, "new_password" to newPassword),
+        )
+    }
+
     /** Signs [email] up through the whole flow and returns the session the verification starts. */
     fun register(
         email: String = newEmail(),
