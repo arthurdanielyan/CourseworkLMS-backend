@@ -24,12 +24,16 @@ data class NewRefreshToken(
     val value: String,
 )
 
-/** A stored refresh token, found by the raw value a client presented. */
+/**
+ * A stored refresh token, found by the raw value a client presented. [wasRotated] tells a token exchanged for a new
+ * one apart from one ended by logout or a password change.
+ */
 data class StoredRefreshToken(
     val id: Long,
     val userId: Int,
     val expiresAt: OffsetDateTime,
     val isRevoked: Boolean,
+    val wasRotated: Boolean,
 )
 
 /** Stores refresh tokens by their SHA-256 hash and tracks their rotation. All functions need a transaction. */
@@ -76,6 +80,12 @@ class RefreshTokenStore(
         }
     }
 
+    fun revoke(id: Long) {
+        RefreshTokensTable.update({ (RefreshTokensTable.id eq id) and RefreshTokensTable.revokedAt.isNull() }) {
+            it[revokedAt] = now()
+        }
+    }
+
     fun revokeAllOf(userId: Int) {
         RefreshTokensTable.update({ (RefreshTokensTable.userId eq userId) and RefreshTokensTable.revokedAt.isNull() }) {
             it[revokedAt] = now()
@@ -97,6 +107,7 @@ class RefreshTokenStore(
             userId = this[RefreshTokensTable.userId],
             expiresAt = this[RefreshTokensTable.expiresAt],
             isRevoked = this[RefreshTokensTable.revokedAt] != null,
+            wasRotated = this[RefreshTokensTable.replacedById] != null,
         )
     }
 

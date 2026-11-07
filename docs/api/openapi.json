@@ -37,6 +37,29 @@
         "tags" : [ "session-controller" ]
       }
     },
+    "/api/v1/auth/logout" : {
+      "post" : {
+        "operationId" : "logout",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Ends the session of this refresh token; the app then forgets both tokens",
+        "tags" : [ "session-controller" ]
+      }
+    },
     "/api/v1/auth/password-resets" : {
       "post" : {
         "operationId" : "start_1",
@@ -1100,6 +1123,83 @@
         "tags" : [ "catalog-lookup-controller" ]
       }
     },
+    "/api/v1/me" : {
+      "get" : {
+        "operationId" : "me",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AccountResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The logged-in user: name, email, role and permissions",
+        "tags" : [ "account-controller" ]
+      }
+    },
+    "/api/v1/me/name" : {
+      "put" : {
+        "operationId" : "rename",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RenameRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AccountResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Changes the logged-in user's name",
+        "tags" : [ "account-controller" ]
+      }
+    },
+    "/api/v1/me/password" : {
+      "post" : {
+        "operationId" : "changePassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenPairResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Changes the password and logs out every other device; this device continues with the token pair in the response",
+        "tags" : [ "account-controller" ]
+      }
+    },
     "/api/v1/publishers" : {
       "get" : {
         "operationId" : "publishers",
@@ -1412,6 +1512,37 @@
   },
   "components" : {
     "schemas" : {
+      "AccountResponse" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "example" : "anna.petrosyan@polytechnic.am"
+          },
+          "full_name" : {
+            "type" : "string",
+            "example" : "Anna Petrosyan"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 2
+          },
+          "permissions" : {
+            "type" : "array",
+            "description" : "What the user may do, for showing or hiding actions",
+            "items" : {
+              "type" : "string",
+              "example" : "reservations.create"
+            }
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "student", "teacher", "admin" ],
+            "example" : "student"
+          }
+        }
+      },
       "BookDetailsResponse" : {
         "type" : "object",
         "properties" : {
@@ -1683,6 +1814,21 @@
           }
         }
       },
+      "ChangePasswordRequest" : {
+        "type" : "object",
+        "properties" : {
+          "current_password" : {
+            "type" : "string",
+            "example" : "Library#2026",
+            "minLength" : 1
+          },
+          "new_password" : {
+            "type" : "string",
+            "example" : "Library#2027"
+          }
+        },
+        "required" : [ "current_password" ]
+      },
       "CompletePasswordResetRequest" : {
         "type" : "object",
         "properties" : {
@@ -1861,6 +2007,18 @@
           }
         },
         "required" : [ "refresh_token" ]
+      },
+      "RenameRequest" : {
+        "type" : "object",
+        "properties" : {
+          "full_name" : {
+            "type" : "string",
+            "example" : "Anna Petrosyan",
+            "maxLength" : 100,
+            "minLength" : 2
+          }
+        },
+        "required" : [ "full_name" ]
       },
       "ResendCodeRequest" : {
         "type" : "object",

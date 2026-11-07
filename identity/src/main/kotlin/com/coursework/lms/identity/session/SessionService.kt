@@ -49,8 +49,11 @@ class SessionService(
     fun refresh(refreshToken: String): TokenPair {
         val stored = refreshTokens.findForUpdate(refreshToken) ?: throw invalidRefreshToken()
         if (stored.isRevoked) {
-            // A rotated token coming back means someone else holds a copy, so every session of the user ends.
-            refreshTokens.revokeAllOf(stored.userId)
+            // A rotated token coming back means someone else holds a copy, so every session of the user ends. One
+            // ended by logout or a password change is only refused: its own device may simply be retrying.
+            if (stored.wasRotated) {
+                refreshTokens.revokeAllOf(stored.userId)
+            }
             throw invalidRefreshToken()
         }
         if (!stored.expiresAt.isAfter(OffsetDateTime.now(clock))) {
@@ -59,6 +62,12 @@ class SessionService(
         val replacement = refreshTokens.create(stored.userId)
         refreshTokens.markReplaced(stored.id, replacement.id)
         return tokenPairIssuer.issue(stored.userId, replacement)
+    }
+
+    /** Ends the session [refreshToken] belongs to; an unknown or already ended one is ignored. */
+    @Transactional
+    fun logout(refreshToken: String) {
+        refreshTokens.findForUpdate(refreshToken)?.let { refreshTokens.revoke(it.id) }
     }
 
     private fun invalidRefreshToken(): ApiException {
