@@ -118,6 +118,10 @@ _Avoid_: queue, hold list, notify list
 A freed copy held for the first user on the Waitlist, who has 24 hours to accept it as a Reservation before it passes to the next user.
 _Avoid_: invite, hold, reservation offer
 
+**Notification**:
+A message to one user about their Reservations or Waitlist, kept in their in-app inbox and also emailed. Each event produces it once.
+_Avoid_: alert, push, message
+
 ### Reviews
 
 **Review**:

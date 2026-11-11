@@ -3,6 +3,10 @@ lms:
     secret: test-secret-that-is-at-least-thirty-two-bytes-long
   mail:
     from: no-reply@lms.test
+  notifications:
+    # Tests run the job themselves, at any time of day.
+    check-interval: PT1H
+    reminder-hour: 0
 
 spring:
   # Never contacted: tests record emails instead of sending them.

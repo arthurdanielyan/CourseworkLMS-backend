@@ -542,7 +542,7 @@
     },
     "/api/v1/books/{book_id}/reviews" : {
       "get" : {
-        "operationId" : "list_2",
+        "operationId" : "list_3",
         "parameters" : [ {
           "in" : "path",
           "name" : "book_id",
@@ -984,7 +984,7 @@
     },
     "/api/v1/favourites" : {
       "get" : {
-        "operationId" : "list_1",
+        "operationId" : "list_2",
         "parameters" : [ {
           "in" : "query",
           "name" : "page",
@@ -1198,6 +1198,105 @@
         },
         "summary" : "Changes the password and logs out every other device; this device continues with the token pair in the response",
         "tags" : [ "account-controller" ]
+      }
+    },
+    "/api/v1/notifications" : {
+      "get" : {
+        "operationId" : "list_1",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "unread_only",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseNotificationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The logged-in user's notifications, the newest first",
+        "tags" : [ "notification-controller" ]
+      }
+    },
+    "/api/v1/notifications/read-all" : {
+      "post" : {
+        "operationId" : "markAllRead",
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Marks every notification as read",
+        "tags" : [ "notification-controller" ]
+      }
+    },
+    "/api/v1/notifications/unread-count" : {
+      "get" : {
+        "operationId" : "unreadCount",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UnreadCountResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "How many notifications are unread, for a badge",
+        "tags" : [ "notification-controller" ]
+      }
+    },
+    "/api/v1/notifications/{id}/read" : {
+      "post" : {
+        "operationId" : "markRead",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Marks one notification as read",
+        "tags" : [ "notification-controller" ]
       }
     },
     "/api/v1/publishers" : {
@@ -1882,6 +1981,46 @@
           }
         }
       },
+      "NotificationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "book" : {
+            "description" : "The book it is about, for opening Book Details",
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/BookRefResponse"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "created_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-11-16T10:30:00Z"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 41
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "It is held for you until 17 November, 14:30. Reserve it in the app before then, or it goes to the next person in line."
+          },
+          "read" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "title" : {
+            "type" : "string",
+            "example" : "A copy of “Clean Code” is waiting for you"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "waitlist_offer", "pickup_reminder", "reservation_expired", "return_reminder", "overdue" ],
+            "example" : "waitlist_offer"
+          }
+        }
+      },
       "PageMetadata" : {
         "type" : "object",
         "properties" : {
@@ -1910,6 +2049,20 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/BookSummaryResponse"
+            }
+          },
+          "page" : {
+            "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "PageResponseNotificationResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/NotificationResponse"
             }
           },
           "page" : {
@@ -2252,6 +2405,16 @@
           "refresh_token" : {
             "type" : "string",
             "example" : "q3Jx9vZt0bWm2LkR8sYfH4nE6uA1cD7gP5oT3iV0xQw"
+          }
+        }
+      },
+      "UnreadCountResponse" : {
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 2
           }
         }
       },

@@ -18,6 +18,7 @@ dependencies {
     implementation(projects.catalog)
     implementation(projects.engagement)
     implementation(projects.circulation)
+    implementation(projects.notifications)
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.spring.boot.starter.flyway)
     implementation(libs.flyway.database.postgresql)
