@@ -5,4 +5,6 @@ object CatalogErrorCode {
 
     const val COPIES_BELOW_HOLDS = "copies_below_holds"
     const val UNSUPPORTED_FILE_TYPE = "unsupported_file_type"
+    const val NAME_TAKEN = "name_taken"
+    const val IN_USE = "in_use"
 }

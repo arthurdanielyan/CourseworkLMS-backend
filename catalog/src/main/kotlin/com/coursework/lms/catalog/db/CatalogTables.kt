@@ -33,6 +33,10 @@ object BookLanguagesTable : Table("book_languages") {
     val name = varchar("name", 50)
 
     override val primaryKey = PrimaryKey(id, name = "book_languages_pk")
+
+    init {
+        uniqueIndex("book_languages_name_lower_key", functions = listOf(name.lowerCase()))
+    }
 }
 
 object AuthorsTable : Table("authors") {
@@ -53,6 +57,10 @@ object CategoriesTable : Table("categories") {
     val name = varchar("name", 50)
 
     override val primaryKey = PrimaryKey(id, name = "categories_pk")
+
+    init {
+        uniqueIndex("categories_name_lower_key", functions = listOf(name.lowerCase()))
+    }
 }
 
 object FilesTable : Table("files") {

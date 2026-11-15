@@ -23,7 +23,7 @@ object ReservationsTable : Table("reservations") {
 
     val id = integer("id").autoIncrement()
     val userId = integer("user_id")
-        .references(UsersTable.id, onDelete = NO_ACTION, onUpdate = CASCADE, fkName = "user_id")
+        .references(UsersTable.id, onDelete = CASCADE, onUpdate = CASCADE, fkName = "user_id")
     val bookId = integer("book_id")
         .references(BooksTable.id, onDelete = CASCADE, onUpdate = CASCADE, fkName = "book_id")
     val createdAt = timestampWithTimeZone("created_at").defaultExpression(now)

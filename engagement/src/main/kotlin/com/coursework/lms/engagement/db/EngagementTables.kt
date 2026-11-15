@@ -4,7 +4,7 @@ import com.coursework.lms.catalog.db.BooksTable
 import com.coursework.lms.identity.db.UsersTable
 import org.jetbrains.exposed.v1.core.CustomFunction
 import org.jetbrains.exposed.v1.core.ReferenceOption.CASCADE
-import org.jetbrains.exposed.v1.core.ReferenceOption.NO_ACTION
+import org.jetbrains.exposed.v1.core.ReferenceOption.SET_NULL
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.between
 import org.jetbrains.exposed.v1.javatime.CurrentDate
@@ -29,8 +29,10 @@ object UsersFavouritesTable : Table("users_favourites") {
 object BookReviewsTable : Table("book_reviews") {
 
     val id = integer("id").autoIncrement()
+    /** Null once the author's account is deleted; the Review itself stays. */
     val userId = integer("user_id")
-        .references(UsersTable.id, onDelete = NO_ACTION, onUpdate = CASCADE, fkName = "user_id")
+        .references(UsersTable.id, onDelete = SET_NULL, onUpdate = CASCADE, fkName = "user_id")
+        .nullable()
     val bookId = integer("book_id")
         .references(BooksTable.id, onDelete = CASCADE, onUpdate = CASCADE, fkName = "book_reviews_book_id_fkey")
     val stars = short("stars").check("book_reviews_stars_check") { it.between(1.toShort(), 5.toShort()) }

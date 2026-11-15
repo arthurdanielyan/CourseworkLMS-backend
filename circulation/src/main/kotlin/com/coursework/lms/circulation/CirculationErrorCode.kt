@@ -9,4 +9,5 @@ object CirculationErrorCode {
     const val INVALID_STATUS = "invalid_status"
     const val BOOK_AVAILABLE = "book_available"
     const val ALREADY_WAITING = "already_waiting"
+    const val HAS_BORROWED_COPIES = "has_borrowed_copies"
 }

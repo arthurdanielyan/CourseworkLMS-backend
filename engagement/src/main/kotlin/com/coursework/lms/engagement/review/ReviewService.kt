@@ -121,7 +121,7 @@ class ReviewService(
 
     private fun reviewQuery(): Query {
         return BookReviewsTable
-            .join(UsersTable, JoinType.INNER, BookReviewsTable.userId, UsersTable.id)
+            .join(UsersTable, JoinType.LEFT, BookReviewsTable.userId, UsersTable.id)
             .select(BookReviewsTable.columns + UsersTable.username)
     }
 
@@ -131,7 +131,7 @@ class ReviewService(
     ): Review {
         return Review(
             id = row[BookReviewsTable.id],
-            author = NamedItem(row[BookReviewsTable.userId], row[UsersTable.username]),
+            author = row[BookReviewsTable.userId]?.let { NamedItem(it, row[UsersTable.username]) },
             stars = row[BookReviewsTable.stars].toInt(),
             text = row[BookReviewsTable.text],
             createdAt = row[BookReviewsTable.createdAt],

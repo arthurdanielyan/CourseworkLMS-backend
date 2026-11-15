@@ -16,6 +16,7 @@ object SeedUsers {
             "users.manage",
             "reviews.moderate",
             "reservations.manage",
+            "catalog.manage",
         ),
     )
 

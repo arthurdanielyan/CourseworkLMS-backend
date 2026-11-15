@@ -980,6 +980,90 @@
         },
         "summary" : "Every category, sorted by name",
         "tags" : [ "catalog-lookup-controller" ]
+      },
+      "post" : {
+        "operationId" : "addCategory",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CatalogListItemRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NamedItemResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Adds a category; admins only",
+        "tags" : [ "catalog-list-controller" ]
+      }
+    },
+    "/api/v1/categories/{id}" : {
+      "delete" : {
+        "operationId" : "removeCategory",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Removes a category no book is filed under; admins only",
+        "tags" : [ "catalog-list-controller" ]
+      },
+      "put" : {
+        "operationId" : "renameCategory",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CatalogListItemRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NamedItemResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Renames a category; admins only",
+        "tags" : [ "catalog-list-controller" ]
       }
     },
     "/api/v1/favourites" : {
@@ -1121,6 +1205,90 @@
         },
         "summary" : "Every book language, sorted by name",
         "tags" : [ "catalog-lookup-controller" ]
+      },
+      "post" : {
+        "operationId" : "addLanguage",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CatalogListItemRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NamedItemResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Adds a book language; admins only",
+        "tags" : [ "catalog-list-controller" ]
+      }
+    },
+    "/api/v1/languages/{id}" : {
+      "delete" : {
+        "operationId" : "removeLanguage",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Removes a book language no book is in; admins only",
+        "tags" : [ "catalog-list-controller" ]
+      },
+      "put" : {
+        "operationId" : "renameLanguage",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CatalogListItemRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NamedItemResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Renames a book language; admins only",
+        "tags" : [ "catalog-list-controller" ]
       }
     },
     "/api/v1/me" : {
@@ -1569,6 +1737,206 @@
         "tags" : [ "review-controller" ]
       }
     },
+    "/api/v1/teacher-emails" : {
+      "get" : {
+        "operationId" : "teacherEmails",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseTeacherEmailResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "The Teacher Emails, sorted by address, each with the account registered under it",
+        "tags" : [ "admin-controller" ]
+      },
+      "post" : {
+        "operationId" : "addTeacherEmail",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddTeacherEmailRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TeacherEmailResponse"
+                }
+              }
+            },
+            "description" : "Created"
+          }
+        },
+        "summary" : "Adds a Teacher Email; a student already registered under it becomes a teacher",
+        "tags" : [ "admin-controller" ]
+      }
+    },
+    "/api/v1/teacher-emails/{id}" : {
+      "delete" : {
+        "operationId" : "removeTeacherEmail",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Removes a Teacher Email; a teacher registered under it becomes a student",
+        "tags" : [ "admin-controller" ]
+      }
+    },
+    "/api/v1/users" : {
+      "get" : {
+        "operationId" : "users",
+        "parameters" : [ {
+          "description" : "Text in the name or email, ignoring case",
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "role",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 0
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageResponseUserSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Users, sorted by name; admins only",
+        "tags" : [ "admin-controller" ]
+      }
+    },
+    "/api/v1/users/{id}" : {
+      "delete" : {
+        "operationId" : "deleteUser",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          }
+        },
+        "summary" : "Deletes an account. Refused while it has a borrowed copy. Its reviews stay without an author and its books become University Books; everything else of it goes.",
+        "tags" : [ "admin-controller" ]
+      }
+    },
+    "/api/v1/users/{id}/role" : {
+      "put" : {
+        "operationId" : "changeRole",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChangeRoleRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Changes a user's role; takes effect at their next token refresh, within 15 minutes",
+        "tags" : [ "admin-controller" ]
+      }
+    },
     "/api/v1/waitlist/mine" : {
       "get" : {
         "operationId" : "mine",
@@ -1641,6 +2009,20 @@
             "example" : "student"
           }
         }
+      },
+      "AddTeacherEmailRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "example" : "anna.petrosyan@polytechnic.am",
+            "maxLength" : 255,
+            "minLength" : 0,
+            "pattern" : "^[^@\\s]+@polytechnic\\.am$"
+          }
+        },
+        "required" : [ "email" ]
       },
       "BookDetailsResponse" : {
         "type" : "object",
@@ -1913,6 +2295,18 @@
           }
         }
       },
+      "CatalogListItemRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "example" : "Robotics",
+            "maxLength" : 50,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "name" ]
+      },
       "ChangePasswordRequest" : {
         "type" : "object",
         "properties" : {
@@ -1927,6 +2321,16 @@
           }
         },
         "required" : [ "current_password" ]
+      },
+      "ChangeRoleRequest" : {
+        "type" : "object",
+        "properties" : {
+          "role" : {
+            "type" : "string",
+            "enum" : [ "student", "teacher", "admin" ],
+            "example" : "teacher"
+          }
+        }
       },
       "CompletePasswordResetRequest" : {
         "type" : "object",
@@ -2091,6 +2495,34 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/ReviewResponse"
+            }
+          },
+          "page" : {
+            "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "PageResponseTeacherEmailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TeacherEmailResponse"
+            }
+          },
+          "page" : {
+            "$ref" : "#/components/schemas/PageMetadata"
+          }
+        }
+      },
+      "PageResponseUserSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserSummaryResponse"
             }
           },
           "page" : {
@@ -2279,11 +2711,16 @@
         "type" : "object",
         "properties" : {
           "author" : {
-            "$ref" : "#/components/schemas/NamedItemResponse",
+            "description" : "null once the author's account is deleted; show it as written by a deleted user",
             "example" : {
               "id" : 2,
               "name" : "Hakob Karapetyan"
-            }
+            },
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/NamedItemResponse"
+            }, {
+              "type" : "null"
+            } ]
           },
           "created_at" : {
             "type" : "string",
@@ -2395,6 +2832,28 @@
         },
         "required" : [ "email", "full_name" ]
       },
+      "TeacherEmailResponse" : {
+        "type" : "object",
+        "properties" : {
+          "account" : {
+            "description" : "The account registered under this email; null until someone signs up with it",
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/UserSummaryResponse"
+            }, {
+              "type" : "null"
+            } ]
+          },
+          "email" : {
+            "type" : "string",
+            "example" : "anna.petrosyan@polytechnic.am"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 3
+          }
+        }
+      },
       "TokenPairResponse" : {
         "type" : "object",
         "properties" : {
@@ -2415,6 +2874,34 @@
             "type" : "integer",
             "format" : "int64",
             "example" : 2
+          }
+        }
+      },
+      "UserSummaryResponse" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "example" : "hakobkarapetyan.tt319@polytechnic.am"
+          },
+          "full_name" : {
+            "type" : "string",
+            "example" : "Hakob Karapetyan"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int32",
+            "example" : 2
+          },
+          "registered_at" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2026-04-08T11:57:48Z"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "student", "teacher", "admin" ],
+            "example" : "student"
           }
         }
       },

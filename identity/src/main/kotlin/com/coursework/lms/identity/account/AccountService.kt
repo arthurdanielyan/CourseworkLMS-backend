@@ -1,6 +1,7 @@
 package com.coursework.lms.identity.account
 
 import com.coursework.lms.core.error.ApiException
+import com.coursework.lms.core.error.ErrorCode
 import com.coursework.lms.identity.IdentityErrorCode
 import com.coursework.lms.identity.db.UsersTable
 import com.coursework.lms.identity.session.CurrentUserLoader
@@ -27,9 +28,15 @@ class AccountService(
     // Read from the database rather than the token, so a role changed since the last refresh shows at once.
     @Transactional(readOnly = true)
     fun find(userId: Int): Account {
+        // A deleted account's access token stays valid until it expires; it counts as no longer valid here.
         val user = UsersTable.select(UsersTable.email, UsersTable.username)
             .where { UsersTable.id eq userId }
-            .single()
+            .singleOrNull()
+            ?: throw ApiException(
+                status = HttpStatus.UNAUTHORIZED,
+                code = ErrorCode.NOT_AUTHENTICATED,
+                detail = "This account no longer exists.",
+            )
         val access = currentUserLoader.load(userId)
         return Account(
             id = userId,

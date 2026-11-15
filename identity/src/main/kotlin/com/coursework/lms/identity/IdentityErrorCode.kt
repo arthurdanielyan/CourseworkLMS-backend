@@ -11,4 +11,7 @@ object IdentityErrorCode {
     const val TOO_MANY_REQUESTS = "too_many_requests"
     const val INVALID_CREDENTIALS = "invalid_credentials"
     const val INVALID_REFRESH_TOKEN = "invalid_refresh_token"
+    const val ALREADY_LISTED = "already_listed"
+    const val OWN_ACCOUNT = "own_account"
+    const val LAST_ADMIN = "last_admin"
 }

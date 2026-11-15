@@ -55,6 +55,14 @@ object UsersTable : Table("users") {
     override val primaryKey = PrimaryKey(id, name = "users_pk")
 }
 
+object TeacherEmailsTable : Table("teacher_emails") {
+
+    val id = integer("id").autoIncrement()
+    val email = varchar("email", 255).uniqueIndex("teacher_emails_email_key")
+
+    override val primaryKey = PrimaryKey(id, name = "teacher_emails_pkey")
+}
+
 object PendingRegistrationsTable : Table("pending_registrations") {
 
     val email = varchar("email", 255)

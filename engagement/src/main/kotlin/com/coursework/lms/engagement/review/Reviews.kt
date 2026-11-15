@@ -3,10 +3,10 @@ package com.coursework.lms.engagement.review
 import com.coursework.lms.catalog.NamedItem
 import java.time.LocalDate
 
-/** [mine] tells whether the logged-in user wrote it. */
+/** [mine] tells whether the logged-in user wrote it; [author] is null once their account is deleted. */
 data class Review(
     val id: Int,
-    val author: NamedItem,
+    val author: NamedItem?,
     val stars: Int,
     val text: String?,
     val createdAt: LocalDate,

@@ -20,8 +20,11 @@ data class ReviewRequest(
 data class ReviewResponse(
     @field:Schema(example = "12")
     val id: Int,
-    @field:Schema(example = """{"id": 2, "name": "Hakob Karapetyan"}""")
-    val author: NamedItemResponse,
+    @field:Schema(
+        description = "null once the author's account is deleted; show it as written by a deleted user",
+        example = """{"id": 2, "name": "Hakob Karapetyan"}""",
+    )
+    val author: NamedItemResponse?,
     @field:Schema(example = "5")
     val stars: Int,
     @field:Schema(description = "null when the reviewer gave only stars", example = "Clear, practical and worth rereading.")

@@ -11,7 +11,7 @@ class ReviewResponseMapper(
     fun map(from: Review): ReviewResponse {
         return ReviewResponse(
             id = from.id,
-            author = namedItemResponseMapper.map(from.author),
+            author = from.author?.let(namedItemResponseMapper::map),
             stars = from.stars,
             text = from.text,
             createdAt = from.createdAt,

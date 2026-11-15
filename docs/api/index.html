@@ -105,7 +105,7 @@
   <header>
     <span class="eyebrow">Library Management System · API v1</span>
     <h1>LMS API Reference</h1>
-    <p class="lead">What the backend accepts and returns today: account access (signup with an email code, login, token refresh, logout, password reset, your own account), the book catalog (search with filters, book details, filter lists), Favourites, Reviews, Reservations, the Waitlist, Notifications, and adding, editing and deleting books. Generated from the backend's code on every change to the endpoints. This page is read-only and cannot send requests.</p>
+    <p class="lead">What the backend accepts and returns today: account access (signup with an email code, login, token refresh, logout, password reset, your own account), the book catalog (search with filters, book details, filter lists), Favourites, Reviews, Reservations, the Waitlist, Notifications, adding, editing and deleting books, and the admin tools (users, Teacher Emails, categories and languages). Generated from the backend's code on every change to the endpoints. This page is read-only and cannot send requests.</p>
   </header>
 
   <section>
@@ -125,6 +125,7 @@
       <li>A Reservation goes <code>reserved</code> → <code>borrowed</code> (an admin hands the copy over) → <code>returned</code> (an admin takes it back). A <code>reserved</code> one becomes <code>cancelled</code> when its user cancels it, or <code>expired</code> when nobody picks it up by <code>pickup_deadline</code>, 48 hours after reserving. The return date is chosen when reserving: after today and at most the book's <code>max_loan_days</code> from today, counted in Yerevan time.</li>
       <li>An Unavailable book has a Waitlist. When a copy comes back, it is held for the first user in line for 24 hours: their entry in <code>/api/v1/waitlist/mine</code> gets <code>offer_expires_at</code>. They accept by reserving the book as usual, and decline by leaving the waitlist. Unanswered, the copy passes to the next in line, or back on the shelf when nobody is waiting.</li>
       <li>Notifications arrive in the inbox at <code>/api/v1/notifications</code> and by email, within a minute of the event: a Waitlist Offer, a pickup reminder 12 hours before the Pickup Window closes, an expired Reservation, a return due tomorrow and an Overdue copy (the last two from 9:00 Yerevan time). <code>/unread-count</code> feeds a badge. Each notification links its <code>book</code> for opening Book Details.</li>
+      <li>Admins manage users at <code>/api/v1/users</code> (search, change role, delete) and the Teacher Emails at <code>/api/v1/teacher-emails</code>: adding one makes the student registered under it a teacher, removing it makes that teacher a student again. A deleted user's reviews stay with <code>author: null</code>; show them as written by a deleted user. Categories and languages are added, renamed and removed (only when no book uses them) at <code>/api/v1/categories</code> and <code>/api/v1/languages</code>.</li>
       <li>Books are added and edited with authors and the publisher given by <strong>name</strong>: a name the library already has (ignoring case) is reused, a new one is added. <code>/api/v1/authors?q=</code> and <code>/api/v1/publishers?q=</code> autocomplete them. A teacher's book is their own and starts with no copies; an admin's is a University Book. Only admins send <code>total_copies</code> and <code>max_loan_days</code>.</li>
       <li>A cover (JPEG, PNG or WebP, up to 5 MB) or PDF (up to 50 MB) is uploaded with <code>PUT /api/v1/books/{id}/cover</code> or <code>/pdf</code> as <code>multipart/form-data</code> with one part named <code>file</code>. The book's <code>cover_image_url</code> and <code>pdf_url</code> then point to <code>/api/v1/files/{id}</code>, which needs no token.</li>
     </ul>
@@ -166,6 +167,12 @@
           <tr><td class="status">400</td><td><code>too_many_attempts</code></td><td>5 wrong codes; this code is dead, resend</td></tr>
           <tr><td class="status">404</td><td><code>registration_not_found</code></td><td>No signup in progress for this email</td></tr>
           <tr><td class="status">409</td><td><code>email_taken</code></td><td>The email was registered in the meantime</td></tr>
+          <tr><td class="path" rowspan="3">PUT /users/{id}/role, DELETE /users/{id}</td><td class="status">409</td><td><code>own_account</code></td><td>Admins can't change or delete their own account</td></tr>
+          <tr><td class="status">409</td><td><code>last_admin</code></td><td>The library must keep at least one admin</td></tr>
+          <tr><td class="status">409</td><td><code>has_borrowed_copies</code></td><td>(delete only) The user still has a borrowed copy</td></tr>
+          <tr><td class="path">POST /teacher-emails</td><td class="status">409</td><td><code>already_listed</code></td><td>The email is already a Teacher Email</td></tr>
+          <tr><td class="path" rowspan="2">POST/PUT/DELETE /categories, /languages</td><td class="status">409</td><td><code>name_taken</code></td><td>Another entry has this name, ignoring case</td></tr>
+          <tr><td class="status">409</td><td><code>in_use</code></td><td>(delete only) Some books are filed under it</td></tr>
           <tr><td class="path">POST /me/password</td><td class="status">400</td><td><code>invalid_credentials</code></td><td>The current password is wrong</td></tr>
           <tr><td class="path">POST /auth/password-resets</td><td class="status">429</td><td><code>too_many_requests</code></td><td>A code was sent less than 2 minutes ago; wait for <code>Retry-After</code></td></tr>
           <tr><td class="path" rowspan="3">POST /auth/password-resets/verify, /complete</td><td class="status">400</td><td><code>invalid_code</code></td><td>Wrong code, or no reset started for this email</td></tr>
