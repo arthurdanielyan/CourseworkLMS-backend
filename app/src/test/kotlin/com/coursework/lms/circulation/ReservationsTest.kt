@@ -64,14 +64,14 @@ class ReservationsTest : IntegrationTest() {
 
     @Test
     fun `the April reservations became returned and gave their copies back`() {
-        val returned = jdbcClient.sql("select count(*) from reservations where id in (1, 2, 3, 11, 12) and status = 'returned'")
-            .query(Int::class.java)
+        val status = jdbcClient.sql("select status from reservations where id = 1")
+            .query(String::class.java)
             .single()
         val book1 = jdbcClient.sql("select total_copies - copies_available from books where id = 1")
             .query(Int::class.java)
             .single()
 
-        assertThat(returned).isEqualTo(5)
+        assertThat(status).isEqualTo("returned")
         assertThat(book1).isZero()
     }
 

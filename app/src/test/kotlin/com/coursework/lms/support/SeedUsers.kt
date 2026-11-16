@@ -2,7 +2,7 @@ package com.coursework.lms.support
 
 import com.coursework.lms.core.security.CurrentUser
 
-/** The users V1 seeds, with the permissions their roles hold after all migrations. */
+/** V1's admin and teacher and the test database's two students, with the permissions their roles hold. */
 object SeedUsers {
 
     val admin = CurrentUser(
@@ -21,13 +21,13 @@ object SeedUsers {
     )
 
     val student = CurrentUser(
-        id = 2,
+        id = 1001,
         role = "student",
         permissions = setOf("books.view", "reservations.create"),
     )
 
     val otherStudent = CurrentUser(
-        id = 3,
+        id = 1002,
         role = "student",
         permissions = setOf("books.view", "reservations.create"),
     )

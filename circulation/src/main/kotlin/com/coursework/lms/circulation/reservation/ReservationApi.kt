@@ -23,7 +23,7 @@ data class ReservationResponse(
     @field:Schema(example = "17")
     val id: Int,
     val book: BookRefResponse,
-    @field:Schema(example = """{"id": 2, "name": "Hakob Karapetyan"}""")
+    @field:Schema(example = """{"id": 2, "name": "Anna Petrosyan"}""")
     val user: NamedItemResponse,
     @field:Schema(
         description = "reserved → borrowed → returned; a reserved one can also become cancelled or expired",

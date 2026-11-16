@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.put
 import java.sql.SQLException
 
-// V1 seeds the student's Favourites as books 1, 61 and 101, and the other student's as 2, 62 and 102.
+// The test database seeds the student's Favourites as books 1, 61 and 101, and the other student's as 2, 62 and 102.
 class FavouritesTest : IntegrationTest() {
 
     @Autowired

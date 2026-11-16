@@ -17,5 +17,5 @@ data class CirculationProperties(
 )
 
 /** The library's time zone, which decides what "today" is for return dates and Overdue. */
-// The reservation trigger in V7 uses the same zone; change both together.
+// The reservation trigger (enforce_reservation_rules) uses the same zone; change both together.
 val LIBRARY_ZONE: ZoneId = ZoneId.of("Asia/Yerevan")

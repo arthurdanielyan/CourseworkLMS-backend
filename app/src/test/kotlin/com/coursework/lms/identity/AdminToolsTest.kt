@@ -57,9 +57,9 @@ class AdminToolsTest : IntegrationTest() {
 
     @Test
     fun `admins find users by name, email and role`() {
-        get("/api/v1/users?q=HAKOB", admin).andExpect {
+        get("/api/v1/users?q=DAVIT", admin).andExpect {
             status { isOk() }
-            jsonPath("$.content[0].full_name") { value("Hakob Karapetyan") }
+            jsonPath("$.content[0].full_name") { value("Davit Sargsyan") }
             jsonPath("$.content[0].role") { value("student") }
         }
         get("/api/v1/users?role=teacher&q=ella", admin).andExpect {

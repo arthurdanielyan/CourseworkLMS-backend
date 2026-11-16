@@ -7,9 +7,9 @@ import java.time.Instant
 data class UserSummaryResponse(
     @field:Schema(example = "2")
     val id: Int,
-    @field:Schema(example = "hakobkarapetyan.tt319@polytechnic.am")
+    @field:Schema(example = "anna.petrosyan@polytechnic.am")
     val email: String,
-    @field:Schema(example = "Hakob Karapetyan")
+    @field:Schema(example = "Anna Petrosyan")
     val fullName: String,
     @field:Schema(allowableValues = ["student", "teacher", "admin"], example = "student")
     val role: String,

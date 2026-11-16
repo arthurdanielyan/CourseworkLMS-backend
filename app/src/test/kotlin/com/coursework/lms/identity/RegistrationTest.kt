@@ -145,7 +145,7 @@ class RegistrationTest : IntegrationTest() {
 
     @Test
     fun `a registered email cannot sign up again`() {
-        auth.startRegistration(email = "hakobkarapetyan.tt319@polytechnic.am").andExpect {
+        auth.startRegistration(email = "ellahovhannisyan@polytechnic.am").andExpect {
             status { isConflict() }
             jsonPath("$.code") { value("email_taken") }
         }

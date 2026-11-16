@@ -98,7 +98,7 @@ class CatalogListService {
         }
     }
 
-    // Names are unique ignoring case (V12), so "physics" can't sit next to "Physics".
+    // Names are unique ignoring case (a lower(name) index), so "physics" can't sit next to "Physics".
     private fun refuseTakenName(
         list: CatalogList,
         name: String,

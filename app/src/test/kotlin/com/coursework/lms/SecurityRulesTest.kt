@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.sql.SQLException
 
-/** The database rules V2 puts in place, exercised as the application role with every change rolled back. */
+/** The database's security rules, exercised as the application role with every change rolled back. */
 class SecurityRulesTest : IntegrationTest() {
 
     @Autowired
@@ -60,11 +60,13 @@ class SecurityRulesTest : IntegrationTest() {
 
     @Test
     fun `users cannot change their own role or email, nor anyone else's account`() {
+        val self = SeedUsers.student.id
+        val other = SeedUsers.otherStudent.id
         val statements = listOf(
-            "update users set role_id = 3 where id = 2",
-            "update users set email = 'other@polytechnic.am' where id = 2",
-            "update users set username = 'Hijacked' where id = 3",
-            "delete from users where id = 2",
+            "update users set role_id = 3 where id = $self",
+            "update users set email = 'other@polytechnic.am' where id = $self",
+            "update users set username = 'Hijacked' where id = $other",
+            "delete from users where id = $self",
         )
         statements.forEach { statement ->
             assertThatThrownBy { asUser.run(SeedUsers.student.id) { jdbc -> jdbc.sql(statement).update() } }
@@ -76,8 +78,11 @@ class SecurityRulesTest : IntegrationTest() {
     @Test
     fun `admins change other users' roles`() {
         val roleId = asUser.run(SeedUsers.admin.id) { jdbc ->
-            jdbc.sql("update users set role_id = 2 where id = 3").update()
-            jdbc.sql("select role_id from users where id = 3").query(Int::class.java).single()
+            jdbc.sql("update users set role_id = 2 where id = :id").param("id", SeedUsers.otherStudent.id).update()
+            jdbc.sql("select role_id from users where id = :id")
+                .param("id", SeedUsers.otherStudent.id)
+                .query(Int::class.java)
+                .single()
         }
 
         assertThat(roleId).isEqualTo(2)
@@ -182,18 +187,19 @@ class SecurityRulesTest : IntegrationTest() {
                 """
                 select id from books b
                 where copies_available > 0
-                  and not exists (select 1 from book_reviews r where r.book_id = b.id and r.user_id = 3)
+                  and not exists (select 1 from book_reviews r where r.book_id = b.id and r.user_id = :user)
                 order by id limit 1
                 """,
-            ).query(Int::class.java).single()
+            ).param("user", SeedUsers.otherStudent.id).query(Int::class.java).single()
             val before = jdbc.copiesAvailable(book)
             jdbc.sql(
                 """
                 insert into reservations (user_id, book_id, return_deadline)
-                values (3, :book, (now() at time zone 'Asia/Yerevan')::date + 1)
+                values (:user, :book, (now() at time zone 'Asia/Yerevan')::date + 1)
                 """,
-            ).param("book", book).update()
-            jdbc.sql("insert into book_reviews (user_id, book_id, stars) values (3, :book, 5)")
+            ).param("user", SeedUsers.otherStudent.id).param("book", book).update()
+            jdbc.sql("insert into book_reviews (user_id, book_id, stars) values (:user, :book, 5)")
+                .param("user", SeedUsers.otherStudent.id)
                 .param("book", book)
                 .update()
             val after = jdbc.copiesAvailable(book)

@@ -9,6 +9,9 @@ lms:
     reminder-hour: 0
 
 spring:
+  flyway:
+    # afterMigrate.sql adds the two students the tests act as.
+    locations: classpath:db/migration,classpath:db/testdata
   # Never contacted: tests record emails instead of sending them.
   mail:
     host: localhost

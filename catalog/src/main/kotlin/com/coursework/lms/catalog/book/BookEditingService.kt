@@ -90,7 +90,7 @@ class BookEditingService(
             }
         }
         val publisherId = publisherIdFor(form.publisher)
-        // Copies Available follows a new total by itself, and added copies go to the Waitlist first (V9 triggers).
+        // Copies Available follows a new total by itself, and added copies go to the Waitlist first (database triggers).
         BooksTable.update({ BooksTable.id eq bookId }) {
             writeFields(it, form, publisherId)
             form.totalCopies?.let { total -> it[totalCopies] = total }

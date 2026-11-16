@@ -2672,7 +2672,7 @@
             "$ref" : "#/components/schemas/NamedItemResponse",
             "example" : {
               "id" : 2,
-              "name" : "Hakob Karapetyan"
+              "name" : "Anna Petrosyan"
             }
           }
         }
@@ -2714,7 +2714,7 @@
             "description" : "null once the author's account is deleted; show it as written by a deleted user",
             "example" : {
               "id" : 2,
-              "name" : "Hakob Karapetyan"
+              "name" : "Anna Petrosyan"
             },
             "oneOf" : [ {
               "$ref" : "#/components/schemas/NamedItemResponse"
@@ -2882,11 +2882,11 @@
         "properties" : {
           "email" : {
             "type" : "string",
-            "example" : "hakobkarapetyan.tt319@polytechnic.am"
+            "example" : "anna.petrosyan@polytechnic.am"
           },
           "full_name" : {
             "type" : "string",
-            "example" : "Hakob Karapetyan"
+            "example" : "Anna Petrosyan"
           },
           "id" : {
             "type" : "integer",

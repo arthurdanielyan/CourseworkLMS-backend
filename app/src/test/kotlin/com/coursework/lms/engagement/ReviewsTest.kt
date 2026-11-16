@@ -20,8 +20,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.put
 import java.sql.SQLException
 
-// V1 seeds three Reviews of book 1: 5 stars by the student, 4 by the other student and 5 by the teacher, written in
-// that order.
+// V1 seeds three Reviews of book 1, oldest first: 5 and 4 stars by deleted users, then 5 stars by the teacher.
 class ReviewsTest : IntegrationTest() {
 
     @Autowired
@@ -37,14 +36,21 @@ class ReviewsTest : IntegrationTest() {
 
     @Test
     fun `a book's Reviews come newest first`() {
-        get("/api/v1/books/1/reviews", SeedUsers.student).andExpect {
-            status { isOk() }
-            jsonPath("$.page.total_elements") { value(3) }
-            jsonPath("$.content[0].author.id") { value(SeedUsers.teacher.id) }
-            jsonPath("$.content[2].author.name") { value("Hakob Karapetyan") }
-            jsonPath("$.content[2].stars") { value(5) }
-            jsonPath("$.content[2].mine") { value(true) }
-            jsonPath("$.content[0].mine") { value(false) }
+        try {
+            writeMine(1, SeedUsers.student, """{"stars": 3}""").andExpect { status { isOk() } }
+
+            get("/api/v1/books/1/reviews", SeedUsers.student).andExpect {
+                status { isOk() }
+                jsonPath("$.page.total_elements") { value(4) }
+                jsonPath("$.content[0].author.name") { value("Anna Petrosyan") }
+                jsonPath("$.content[0].mine") { value(true) }
+                jsonPath("$.content[1].author.id") { value(SeedUsers.teacher.id) }
+                jsonPath("$.content[1].mine") { value(false) }
+                jsonPath("$.content[3].author") { value(null) }
+                jsonPath("$.content[3].stars") { value(5) }
+            }
+        } finally {
+            deleteMine(1, SeedUsers.student)
         }
     }
 
@@ -52,7 +58,7 @@ class ReviewsTest : IntegrationTest() {
     fun `the stars filter keeps the matching Reviews`() {
         get("/api/v1/books/1/reviews?stars=4", SeedUsers.student).andExpect {
             jsonPath("$.page.total_elements") { value(1) }
-            jsonPath("$.content[0].author.id") { value(SeedUsers.otherStudent.id) }
+            jsonPath("$.content[0].author") { value(null) }
         }
         get("/api/v1/books/1/reviews?stars=1&stars=2", SeedUsers.student).andExpect {
             jsonPath("$.page.total_elements") { value(0) }
@@ -61,14 +67,20 @@ class ReviewsTest : IntegrationTest() {
 
     @Test
     fun `the summary counts Reviews per star and finds the user's own`() {
-        get("/api/v1/books/1/reviews/summary", SeedUsers.student).andExpect {
-            status { isOk() }
-            jsonPath("$.total") { value(3) }
-            jsonPath("$.average") { value(4.7) }
-            jsonPath("$.five_stars") { value(2) }
-            jsonPath("$.four_stars") { value(1) }
-            jsonPath("$.one_star") { value(0) }
-            jsonPath("$.my_review.stars") { value(5) }
+        try {
+            writeMine(1, SeedUsers.student, """{"stars": 4}""").andExpect { status { isOk() } }
+
+            get("/api/v1/books/1/reviews/summary", SeedUsers.student).andExpect {
+                status { isOk() }
+                jsonPath("$.total") { value(4) }
+                jsonPath("$.average") { value(4.5) }
+                jsonPath("$.five_stars") { value(2) }
+                jsonPath("$.four_stars") { value(2) }
+                jsonPath("$.one_star") { value(0) }
+                jsonPath("$.my_review.stars") { value(4) }
+            }
+        } finally {
+            deleteMine(1, SeedUsers.student)
         }
     }
 
@@ -145,7 +157,7 @@ class ReviewsTest : IntegrationTest() {
 
     @Test
     fun `the database keeps Reviews to their authors`() {
-        val othersReview = reviewIdOf(SeedUsers.otherStudent, 1)
+        val othersReview = reviewIdOf(SeedUsers.teacher, 1)
 
         assertThatThrownBy {
             asUser.run(SeedUsers.student.id) { jdbc ->
@@ -170,14 +182,16 @@ class ReviewsTest : IntegrationTest() {
     fun `the database allows one Review per user and book, with one to five stars`() {
         assertThatThrownBy {
             asUser.run(SeedUsers.student.id) { jdbc ->
-                jdbc.sql("insert into book_reviews (user_id, book_id, stars) values (:user, 1, 3)")
-                    .param("user", SeedUsers.student.id)
-                    .update()
+                repeat(2) {
+                    jdbc.sql("insert into book_reviews (user_id, book_id, stars) values (:user, 1, 3)")
+                        .param("user", SeedUsers.student.id)
+                        .update()
+                }
             }
         }.hasSqlState(UNIQUE_VIOLATION)
         assertThatThrownBy {
             asUser.run(SeedUsers.student.id) { jdbc ->
-                jdbc.sql("update book_reviews set stars = 0 where user_id = :user and book_id = 1")
+                jdbc.sql("insert into book_reviews (user_id, book_id, stars) values (:user, 1, 0)")
                     .param("user", SeedUsers.student.id)
                     .update()
             }

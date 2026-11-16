@@ -183,13 +183,19 @@ class WaitlistTest : IntegrationTest() {
 
         assertThatThrownBy {
             asUser.run(SeedUsers.student.id) { jdbc ->
-                jdbc.sql("insert into waitlist (book_id, user_id) values (:book, 2)").param("book", bookId).update()
+                jdbc.sql("insert into waitlist (book_id, user_id) values (:book, :user)")
+                    .param("book", bookId)
+                    .param("user", SeedUsers.student.id)
+                    .update()
             }
         }.hasSqlState(CHECK_VIOLATION)
         assertThatThrownBy {
             asUser.run(SeedUsers.admin.id) { jdbc ->
                 jdbc.sql("update books set copies_available = 0 where id = :book").param("book", bookId).update()
-                jdbc.sql("insert into waitlist (book_id, user_id) values (:book, 3)").param("book", bookId).update()
+                jdbc.sql("insert into waitlist (book_id, user_id) values (:book, :user)")
+                    .param("book", bookId)
+                    .param("user", SeedUsers.otherStudent.id)
+                    .update()
             }
         }.hasSqlState(INSUFFICIENT_PRIVILEGE)
     }

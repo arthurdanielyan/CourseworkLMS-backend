@@ -22,7 +22,7 @@ data class ReviewResponse(
     val id: Int,
     @field:Schema(
         description = "null once the author's account is deleted; show it as written by a deleted user",
-        example = """{"id": 2, "name": "Hakob Karapetyan"}""",
+        example = """{"id": 2, "name": "Anna Petrosyan"}""",
     )
     val author: NamedItemResponse?,
     @field:Schema(example = "5")
